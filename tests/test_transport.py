@@ -14,6 +14,7 @@ from netskopesdwan.exceptions import (
     ValidationError,
 )
 from netskopesdwan.transport import Transport
+from tests.fixtures import error_response_fixture
 
 
 @pytest.mark.parametrize(
@@ -38,8 +39,8 @@ def test_transport_maps_http_statuses(status_code: int, expected_exception: type
 
     response = _build_response(
         status_code=status_code,
-        body={"message": "problem details"},
-        url="https://tenant.api.infiot.net/gateways",
+        body=error_response_fixture(),
+        url="https://tenant.api.infiot.net/v2/gateways",
         method="GET",
     )
 
@@ -47,8 +48,10 @@ def test_transport_maps_http_statuses(status_code: int, expected_exception: type
         transport._raise_for_status(response)
 
     message = str(excinfo.value)
-    assert "GET https://tenant.api.infiot.net/gateways returned HTTP" in message
-    assert "problem details" in message
+    assert "GET https://tenant.api.infiot.net/v2/gateways returned HTTP" in message
+    assert "Gateway lookup failed" in message
+    assert "error_code=GW_NOT_FOUND" in message
+    assert "request_id=req-sanitized-001" in message
 
 
 def test_transport_uses_text_body_when_json_is_unavailable() -> None:
@@ -61,7 +64,7 @@ def test_transport_uses_text_body_when_json_is_unavailable() -> None:
     response = _build_response(
         status_code=500,
         body="plain failure body",
-        url="https://tenant.api.infiot.net/gateways",
+        url="https://tenant.api.infiot.net/v2/gateways",
         method="POST",
         content_type="text/plain",
     )
@@ -70,7 +73,7 @@ def test_transport_uses_text_body_when_json_is_unavailable() -> None:
         transport._raise_for_status(response)
 
     message = str(excinfo.value)
-    assert "POST https://tenant.api.infiot.net/gateways returned HTTP 500" in message
+    assert "POST https://tenant.api.infiot.net/v2/gateways returned HTTP 500" in message
     assert "plain failure body" in message
 
 

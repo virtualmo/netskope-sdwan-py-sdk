@@ -6,61 +6,44 @@ from ..exceptions import APIResponseError
 from ..models.gateway import Gateway
 from .base import BaseManager
 
+GATEWAYS_PATH = "/v2/gateways"
+GATEWAY_BY_ID_PATH = "/v2/gateways/{id}"
+
 
 class GatewayManager(BaseManager):
-    resource_path = "/gateways"
+    resource_path = GATEWAYS_PATH
 
     def list(self) -> list[Gateway]:
         payload = self._get()
-        return _parse_gateway_collection(payload)
+        return _parse_gateway_list_response(payload)
 
     def get(self, gateway_id: str) -> Gateway:
-        payload = self._get(gateway_id)
-        return _parse_gateway(payload)
-
-def _parse_gateway_collection(payload: Any) -> list[Gateway]:
-    items = _extract_items(payload)
-    gateways: list[Gateway] = []
-    for item in items:
-        gateway = Gateway.from_dict(item)
-        if gateway.id:
-            gateways.append(gateway)
-    return gateways
+        payload = self._get(GATEWAY_BY_ID_PATH.format(id=gateway_id))
+        return _parse_gateway_object_response(payload)
 
 
-def _extract_items(payload: Any) -> list[dict[str, Any]]:
-    if isinstance(payload, list):
-        return [item for item in payload if isinstance(item, dict)]
-    if isinstance(payload, dict):
-        for key in ("items", "gateways", "results"):
-            value = payload.get(key)
-            if isinstance(value, list):
-                return [item for item in value if isinstance(item, dict)]
-        data = payload.get("data")
-        if isinstance(data, list):
-            return [item for item in data if isinstance(item, dict)]
-        if isinstance(data, dict):
-            for key in ("items", "gateways", "results"):
-                value = data.get(key)
-                if isinstance(value, list):
-                    return [item for item in value if isinstance(item, dict)]
-    return []
+def _parse_gateway_list_response(payload: Any) -> list[Gateway]:
+    if not isinstance(payload, list):
+        raise APIResponseError(
+            "Gateway list response must be a top-level JSON array."
+        )
+    return [_adapt_gateway(item) for item in payload]
 
 
-def _parse_gateway(payload: Any) -> Gateway:
-    gateway = Gateway.from_dict(_extract_single(payload))
+def _parse_gateway_object_response(payload: Any) -> Gateway:
+    if not isinstance(payload, dict):
+        raise APIResponseError(
+            "Gateway detail response must be a top-level JSON object."
+        )
+    gateway = _adapt_gateway(payload)
     if not gateway.id:
         raise APIResponseError(
-            "Gateway response did not include a recognizable gateway identifier."
+            "Gateway detail response did not include the required 'id' field."
         )
     return gateway
 
 
-def _extract_single(payload: Any) -> dict[str, Any]:
-    if isinstance(payload, dict):
-        for key in ("item", "data", "gateway"):
-            value = payload.get(key)
-            if isinstance(value, dict):
-                return value
-        return payload
-    return {}
+def _adapt_gateway(payload: Any) -> Gateway:
+    if not isinstance(payload, dict):
+        raise APIResponseError("Gateway payload items must be JSON objects.")
+    return Gateway.from_dict(payload)

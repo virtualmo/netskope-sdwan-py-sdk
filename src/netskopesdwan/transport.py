@@ -86,6 +86,8 @@ class Transport:
 
 def _build_error_message(response: requests.Response) -> str:
     default_message = f"API request failed with status {response.status_code}."
+    error_code: str | None = None
+    request_id: str | None = None
     try:
         payload = response.json()
     except ValueError:
@@ -94,13 +96,29 @@ def _build_error_message(response: requests.Response) -> str:
     else:
         detail = default_message
         if isinstance(payload, dict):
-            for key in ("message", "error", "detail"):
-                value = payload.get(key)
-                if isinstance(value, str) and value.strip():
-                    detail = value.strip()
-                    break
+            message = payload.get("message")
+            if isinstance(message, str) and message.strip():
+                detail = message.strip()
+            else:
+                for key in ("error", "detail"):
+                    value = payload.get(key)
+                    if isinstance(value, str) and value.strip():
+                        detail = value.strip()
+                        break
+            error_code_value = payload.get("error_code")
+            if isinstance(error_code_value, str) and error_code_value.strip():
+                error_code = error_code_value.strip()
+            request_id_value = payload.get("request_id")
+            if isinstance(request_id_value, str) and request_id_value.strip():
+                request_id = request_id_value.strip()
 
     request = response.request
     method = request.method if request is not None else "UNKNOWN"
     url = request.url if request is not None else "unknown URL"
-    return f"{method} {url} returned HTTP {response.status_code}: {detail}"
+    extras: list[str] = []
+    if error_code:
+        extras.append(f"error_code={error_code}")
+    if request_id:
+        extras.append(f"request_id={request_id}")
+    suffix = f" ({', '.join(extras)})" if extras else ""
+    return f"{method} {url} returned HTTP {response.status_code}: {detail}{suffix}"

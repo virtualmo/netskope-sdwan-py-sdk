@@ -11,12 +11,41 @@ This first milestone focuses on:
 - minimal gateway manager support
 - lightweight tests with no live API dependency
 
+## Requirements
+
+- Python 3.11+
+
 ## Install
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .[dev]
+```
+
+## Developer Setup
+
+Python 3.11+ is required.
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+```
+
+```bash
+pip install -e .[dev]
+```
+
+```bash
+pytest -q
+```
+
+```bash
+ruff check .
+```
+
+```bash
+python examples/basic_gateways.py
 ```
 
 ## Usage
