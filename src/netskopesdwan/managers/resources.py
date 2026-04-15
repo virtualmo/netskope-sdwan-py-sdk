@@ -49,6 +49,25 @@ class DeviceGroupManager(ReadOnlyResourceManager):
         super().__init__(transport, resource_path="/device-groups", resource_label="device group")
 
 
+class ClientTemplateManager(ReadOnlyResourceManager):
+    def __init__(self, transport) -> None:
+        super().__init__(
+            transport,
+            resource_path="/client-templates",
+            resource_label="client template",
+        )
+
+
+class ClientManager(ReadOnlyResourceManager):
+    def __init__(self, transport) -> None:
+        super().__init__(transport, resource_path="/clients", resource_label="client")
+
+
+class CloudAccountManager(ReadOnlyResourceManager):
+    def __init__(self, transport) -> None:
+        super().__init__(transport, resource_path="/cloud-accounts", resource_label="cloud account")
+
+
 class GatewayGroupManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(transport, resource_path="/gateway-groups", resource_label="gateway group")
@@ -86,6 +105,21 @@ class VPNPeerManager(ReadOnlyResourceManager):
 class PolicyManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(transport, resource_path="/policies", resource_label="policy")
+
+
+class TenantManager(ReadOnlyResourceManager):
+    def __init__(self, transport) -> None:
+        super().__init__(transport, resource_path="/tenants", resource_label="tenant")
+
+
+class UserGroupManager(ReadOnlyResourceManager):
+    def __init__(self, transport) -> None:
+        super().__init__(transport, resource_path="/user-groups", resource_label="user group")
+
+
+class UserManager(ReadOnlyResourceManager):
+    def __init__(self, transport) -> None:
+        super().__init__(transport, resource_path="/users", resource_label="user")
 
 
 class RadiusServerManager(ReadOnlyResourceManager):

@@ -15,6 +15,9 @@ from tests.fixtures import (
 def test_client_wires_read_only_managers() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
+    assert client.client_templates.resource_path == "/client-templates"
+    assert client.clients.resource_path == "/clients"
+    assert client.cloud_accounts.resource_path == "/cloud-accounts"
     assert client.device_groups.resource_path == "/device-groups"
     assert client.gateway_groups.resource_path == "/gateway-groups"
     assert client.gateway_templates.resource_path == "/gateway-templates"
@@ -22,6 +25,9 @@ def test_client_wires_read_only_managers() -> None:
     assert client.ntp_configs.resource_path == "/ntp-configs"
     assert client.overlay_tags.resource_path == "/overlay-tags"
     assert client.segments.resource_path == "/segments"
+    assert client.tenants.resource_path == "/tenants"
+    assert client.user_groups.resource_path == "/user-groups"
+    assert client.users.resource_path == "/users"
     assert client.vpn_peers.resource_path == "/vpnpeers"
     assert client.policies.resource_path == "/policies"
     assert client.radius_servers.resource_path == "/radius-servers"
@@ -77,6 +83,54 @@ def test_radius_server_get_parses_detail_object() -> None:
     assert item.raw == fixture
 
 
+def test_client_templates_list_parses_paginated_envelope() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = resource_envelope_list_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/client-templates"
+        return fixture
+
+    client.transport.get = fake_get
+
+    items = client.client_templates.list()
+
+    assert [item.id for item in items] == ["res-001", "res-002"]
+
+
+def test_clients_get_parses_detail_object() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = resource_detail_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/clients/client-001"
+        return fixture
+
+    client.transport.get = fake_get
+
+    item = client.clients.get("client-001")
+
+    assert item.id == "res-001"
+    assert item.raw == fixture
+
+
+def test_cloud_accounts_list_fails_when_payload_shape_is_invalid() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/cloud-accounts"
+        return "not-json-object"
+
+    client.transport.get = fake_get
+
+    with pytest.raises(APIResponseError) as excinfo:
+        client.cloud_accounts.list()
+
+    assert "Cloud account list response must be a top-level JSON array or object." in str(
+        excinfo.value
+    )
+
+
 def test_segments_list_fails_when_envelope_list_field_is_missing() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
@@ -122,3 +176,50 @@ def test_gateway_templates_get_fails_when_id_is_missing() -> None:
         client.gateway_templates.get("template-001")
 
     assert "required 'id' field" in str(excinfo.value)
+
+
+def test_tenants_list_parses_top_level_array() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = resource_array_list_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/tenants"
+        return fixture
+
+    client.transport.get = fake_get
+
+    items = client.tenants.list()
+
+    assert [item.id for item in items] == ["res-001", "res-002"]
+
+
+def test_user_groups_get_fails_when_id_is_missing() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/user-groups/group-001"
+        return {"name": "Group One"}
+
+    client.transport.get = fake_get
+
+    with pytest.raises(APIResponseError) as excinfo:
+        client.user_groups.get("group-001")
+
+    assert "User group detail response did not include the required 'id' field." in str(
+        excinfo.value
+    )
+
+
+def test_users_list_fails_when_list_field_type_is_invalid() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/users"
+        return {"data": {"id": "user-001"}}
+
+    client.transport.get = fake_get
+
+    with pytest.raises(APIResponseError) as excinfo:
+        client.users.list()
+
+    assert "User list response field 'data' must be a JSON array." in str(excinfo.value)

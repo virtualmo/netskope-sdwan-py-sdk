@@ -1,5 +1,8 @@
 from .gateways import GatewayManager
 from .resources import (
+    ClientManager,
+    ClientTemplateManager,
+    CloudAccountManager,
     DeviceGroupManager,
     GatewayGroupManager,
     GatewayTemplateManager,
@@ -10,12 +13,18 @@ from .resources import (
     RadiusServerManager,
     ReadOnlyResourceManager,
     SegmentManager,
+    TenantManager,
+    UserGroupManager,
+    UserManager,
     VPNPeerManager,
 )
 
 __all__ = [
     "GatewayManager",
     "ReadOnlyResourceManager",
+    "ClientTemplateManager",
+    "ClientManager",
+    "CloudAccountManager",
     "DeviceGroupManager",
     "GatewayGroupManager",
     "GatewayTemplateManager",
@@ -25,5 +34,8 @@ __all__ = [
     "PolicyManager",
     "RadiusServerManager",
     "SegmentManager",
+    "TenantManager",
+    "UserGroupManager",
+    "UserManager",
     "VPNPeerManager",
 ]
