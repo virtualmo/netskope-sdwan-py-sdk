@@ -31,9 +31,9 @@ def load_settings(
     verify_ssl: bool,
     sdwan_tenant_name: str | None,
 ) -> ClientSettings:
-    resolved_base_url = base_url or _read_env(ENV_BASE_URL)
-    resolved_tenant_url = tenant_url or _read_env(ENV_TENANT_URL)
-    resolved_api_token = api_token or _read_env(ENV_API_TOKEN)
+    resolved_base_url = base_url if base_url is not None else _read_env(ENV_BASE_URL)
+    resolved_tenant_url = tenant_url if tenant_url is not None else _read_env(ENV_TENANT_URL)
+    resolved_api_token = api_token if api_token is not None else _read_env(ENV_API_TOKEN)
     resolved_timeout = timeout if timeout is not None else _read_timeout()
 
     if not resolved_base_url and not resolved_tenant_url:

@@ -3,27 +3,34 @@ from __future__ import annotations
 from typing import Any
 
 
-def gateway_list_response_fixture() -> list[dict[str, Any]]:
-    return [
-        {
-            "id": "gw-001",
-            "name": "Branch Gateway 1",
-            "managed": True,
-            "is_activated": True,
-            "overlay_id": "overlay-1",
-            "created_at": "2024-01-01T00:00:00Z",
-            "modified_at": "2024-01-02T00:00:00Z",
+def gateway_list_response_fixture() -> dict[str, Any]:
+    return {
+        "page_info": {
+            "page": 1,
+            "page_size": 2,
+            "total": 2,
         },
-        {
-            "id": "gw-002",
-            "name": "Branch Gateway 2",
-            "managed": False,
-            "is_activated": False,
-            "overlay_id": "overlay-2",
-            "created_at": "2024-02-01T00:00:00Z",
-            "modified_at": "2024-02-02T00:00:00Z",
-        },
-    ]
+        "data": [
+            {
+                "id": "gw-001",
+                "name": "Branch Gateway 1",
+                "managed": True,
+                "is_activated": True,
+                "overlay_id": "overlay-1",
+                "created_at": "2024-01-01T00:00:00Z",
+                "modified_at": "2024-01-02T00:00:00Z",
+            },
+            {
+                "id": "gw-002",
+                "name": "Branch Gateway 2",
+                "managed": False,
+                "is_activated": False,
+                "overlay_id": "overlay-2",
+                "created_at": "2024-02-01T00:00:00Z",
+                "modified_at": "2024-02-02T00:00:00Z",
+            },
+        ],
+    }
 
 
 def gateway_detail_response_fixture() -> dict[str, Any]:

@@ -77,6 +77,33 @@ def test_transport_uses_text_body_when_json_is_unavailable() -> None:
     assert "plain failure body" in message
 
 
+def test_transport_request_raises_before_gateway_parsing_on_error_payload(monkeypatch) -> None:
+    transport = Transport(
+        base_url="https://tenant.api.infiot.net",
+        api_token="TOKEN",
+        timeout=30,
+        verify_ssl=True,
+    )
+    response = _build_response(
+        status_code=400,
+        body=error_response_fixture(),
+        url="https://tenant.api.infiot.net/v2/gateways",
+        method="GET",
+    )
+
+    def fake_request(**kwargs):
+        return response
+
+    monkeypatch.setattr(transport.session, "request", fake_request)
+
+    with pytest.raises(ValidationError) as excinfo:
+        transport.request("GET", "/v2/gateways")
+
+    message = str(excinfo.value)
+    assert "GET https://tenant.api.infiot.net/v2/gateways returned HTTP 400" in message
+    assert "Gateway lookup failed" in message
+
+
 def _build_response(
     *,
     status_code: int,

@@ -34,6 +34,32 @@ def test_client_loads_environment(monkeypatch) -> None:
     assert client.transport.session.headers["Authorization"] == "Bearer ENV_TOKEN"
 
 
+def test_explicit_base_url_overrides_env_base_url(monkeypatch) -> None:
+    monkeypatch.setenv("NETSKOPESDWAN_BASE_URL", "env.au.infiot.net")
+    monkeypatch.setenv("NETSKOPESDWAN_API_TOKEN", "ENV_TOKEN")
+
+    client = SDWANClient(
+        base_url="explicit.eu.infiot.net",
+        api_token="TOKEN",
+    )
+
+    assert client.resolved_base_url == "https://explicit.api.eu.infiot.net"
+    assert client.transport.session.headers["Authorization"] == "Bearer TOKEN"
+
+
+def test_explicit_tenant_url_overrides_env_tenant_url(monkeypatch) -> None:
+    monkeypatch.setenv("NETSKOPESDWAN_TENANT_URL", "env.au.infiot.net")
+    monkeypatch.setenv("NETSKOPESDWAN_API_TOKEN", "ENV_TOKEN")
+
+    client = SDWANClient(
+        tenant_url="explicit.eu.infiot.net",
+        api_token="TOKEN",
+    )
+
+    assert client.resolved_base_url == "https://explicit.api.eu.infiot.net"
+    assert client.resolution_metadata["input_host"] == "explicit.eu.infiot.net"
+
+
 def test_client_loads_tenant_url_from_environment(monkeypatch) -> None:
     monkeypatch.setenv("NETSKOPESDWAN_TENANT_URL", "customer.de.goskope.com")
     monkeypatch.setenv("NETSKOPESDWAN_API_TOKEN", "ENV_TOKEN")
@@ -42,6 +68,18 @@ def test_client_loads_tenant_url_from_environment(monkeypatch) -> None:
 
     assert client.resolved_base_url == "https://legacy123.api.eu.infiot.net"
     assert client.resolution_metadata["input_host"] == "customer.de.goskope.com"
+
+
+def test_environment_values_are_used_only_when_constructor_values_are_absent(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("NETSKOPESDWAN_BASE_URL", "env.eu.infiot.net")
+    monkeypatch.setenv("NETSKOPESDWAN_API_TOKEN", "ENV_TOKEN")
+
+    client = SDWANClient()
+
+    assert client.resolved_base_url == "https://env.api.eu.infiot.net"
+    assert client.transport.session.headers["Authorization"] == "Bearer ENV_TOKEN"
 
 
 def test_client_initialization_with_tenant_url_only() -> None:

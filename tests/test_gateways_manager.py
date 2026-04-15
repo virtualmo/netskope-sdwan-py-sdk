@@ -9,7 +9,7 @@ from netskopesdwan.models.gateway import Gateway
 from tests.fixtures import gateway_detail_response_fixture, gateway_list_response_fixture
 
 
-def test_gateways_manager_list_parses_top_level_array() -> None:
+def test_gateways_manager_list_parses_paginated_envelope() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
     fixture = gateway_list_response_fixture()
 
@@ -24,21 +24,39 @@ def test_gateways_manager_list_parses_top_level_array() -> None:
     assert [item.id for item in gateways] == ["gw-001", "gw-002"]
     assert gateways[0].managed is True
     assert gateways[1].is_activated is False
+    assert client.gateways._last_page_info == fixture["page_info"]
 
 
-def test_gateways_manager_list_fails_on_non_array_payload() -> None:
+def test_gateways_manager_list_fails_when_list_field_is_missing() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
     def fake_get(path: str, *, params=None):
         assert path == GATEWAYS_PATH
-        return {"id": "gw-001"}
+        return {"page_info": {"page": 1}, "request_id": "req-123"}
 
     client.transport.get = fake_get
 
     with pytest.raises(APIResponseError) as excinfo:
         client.gateways.list()
 
-    assert "top-level JSON array" in str(excinfo.value)
+    message = str(excinfo.value)
+    assert "Expected 'data' or 'items'" in message
+    assert "Top-level keys: page_info, request_id" in message
+
+
+def test_gateways_manager_list_fails_when_list_field_type_is_malformed() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+
+    def fake_get(path: str, *, params=None):
+        assert path == GATEWAYS_PATH
+        return {"page_info": {"page": 1}, "data": {"id": "gw-001"}}
+
+    client.transport.get = fake_get
+
+    with pytest.raises(APIResponseError) as excinfo:
+        client.gateways.list()
+
+    assert "field 'data' must be a JSON array" in str(excinfo.value)
 
 
 def test_gateways_manager_get_parses_top_level_object() -> None:
