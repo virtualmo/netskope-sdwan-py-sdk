@@ -15,17 +15,12 @@ This first milestone focuses on:
 
 - Python 3.11+
 
-## Install
+## Getting Started
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .[dev]
+git clone https://github.com/ns-melamin/netskope-sdwan-py-sdk.git
+cd netskope-sdwan-py-sdk
 ```
-
-## Developer Setup
-
-Python 3.11+ is required.
 
 ```bash
 python3.11 -m venv .venv
@@ -36,13 +31,19 @@ source .venv/bin/activate
 pip install -e .[dev]
 ```
 
+## Run Tests
+
 ```bash
 pytest -q
 ```
 
+## Linting
+
 ```bash
 ruff check .
 ```
+
+## Run Example
 
 ```bash
 python examples/basic_gateways.py
@@ -115,3 +116,9 @@ Not implemented yet:
 - live DNS/CNAME discovery
 - async support
 - CLI or MCP integrations
+
+## Future Installation (planned)
+
+```bash
+pip install netskopesdwan
+```
