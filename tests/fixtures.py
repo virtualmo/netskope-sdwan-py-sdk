@@ -76,3 +76,11 @@ def resource_array_list_fixture() -> list[dict[str, Any]]:
 
 def resource_detail_fixture() -> dict[str, Any]:
     return {"id": "res-001", "name": "Resource One", "host": "redacted"}
+
+
+def raw_object_fixture() -> dict[str, Any]:
+    return {"status": "ok", "operator": "sanitized", "updated_at": "2024-01-01T00:00:00Z"}
+
+
+def site_command_output_fixture() -> str:
+    return "command output line 1\ncommand output line 2\n"

@@ -44,6 +44,17 @@ class InventoryDeviceManager(ReadOnlyResourceManager):
         )
 
 
+class AuditEventManager(ReadOnlyResourceManager):
+    def __init__(self, transport) -> None:
+        super().__init__(transport, resource_path="/auditevents", resource_label="audit event")
+
+    def get(self, resource_id: str) -> ResourceRecord:
+        raise AttributeError(
+            "AuditEventManager does not support get(id) because the current SDK batch only "
+            "includes GET /auditevents."
+        )
+
+
 class DeviceGroupManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(transport, resource_path="/device-groups", resource_label="device group")
@@ -66,6 +77,24 @@ class ClientManager(ReadOnlyResourceManager):
 class CloudAccountManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(transport, resource_path="/cloud-accounts", resource_label="cloud account")
+
+
+class ControllerOperatorManager(ReadOnlyResourceManager):
+    def __init__(self, transport) -> None:
+        super().__init__(
+            transport,
+            resource_path="/controller-operators",
+            resource_label="controller operator",
+        )
+
+
+class ControllerManager(ReadOnlyResourceManager):
+    def __init__(self, transport) -> None:
+        super().__init__(transport, resource_path="/controllers", resource_label="controller")
+
+    def get_operator_status(self, controller_id: str) -> dict[str, Any]:
+        payload = self._get(f"/controllers/{controller_id}/operator_status")
+        return _parse_raw_object_response(payload, resource_label="controller operator status")
 
 
 class GatewayGroupManager(ReadOnlyResourceManager):
@@ -105,6 +134,40 @@ class VPNPeerManager(ReadOnlyResourceManager):
 class PolicyManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(transport, resource_path="/policies", resource_label="policy")
+
+
+class SiteCommandManager(ReadOnlyResourceManager):
+    def __init__(self, transport) -> None:
+        super().__init__(transport, resource_path="/site-commands", resource_label="site command")
+
+    def get_output(self, command_id: str, name: str) -> str:
+        return self._transport.get_text(f"/site-command/{command_id}/output/{name}")
+
+
+class SoftwareManager(ReadOnlyResourceManager):
+    def __init__(self, transport) -> None:
+        super().__init__(
+            transport,
+            resource_path="/software-versions",
+            resource_label="software version",
+        )
+
+    def list_downloads(self) -> list[ResourceRecord]:
+        payload = self._get("/software-downloads")
+        return _parse_resource_list_response(
+            payload,
+            resource_label="software download",
+            list_field_candidates=self.list_field_candidates,
+        )
+
+    def list_versions(self) -> list[ResourceRecord]:
+        return self.list()
+
+    def get(self, resource_id: str) -> ResourceRecord:
+        raise AttributeError(
+            "SoftwareManager does not support get(id) because the current SDK batch only "
+            "includes GET /software-downloads and GET /software-versions."
+        )
 
 
 class TenantManager(ReadOnlyResourceManager):
@@ -177,6 +240,12 @@ def _adapt_resource(payload: Any, *, resource_label: str) -> ResourceRecord:
     if not isinstance(payload, dict):
         raise APIResponseError(f"{_label(resource_label)} payload items must be JSON objects.")
     return ResourceRecord.from_dict(payload)
+
+
+def _parse_raw_object_response(payload: Any, *, resource_label: str) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        raise APIResponseError(f"{_label(resource_label)} response must be a top-level JSON object.")
+    return payload
 
 
 def _label(value: str) -> str:

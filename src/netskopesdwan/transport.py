@@ -63,6 +63,17 @@ class Transport:
     def get(self, path: str, *, params: dict[str, Any] | None = None) -> Any:
         return self.request("GET", path, params=params)
 
+    def get_text(self, path: str, *, params: dict[str, Any] | None = None) -> str:
+        response = self.session.request(
+            method="GET",
+            url=f"{self.base_url}/{path.lstrip('/')}",
+            params=params,
+            timeout=self.timeout,
+            verify=self.verify_ssl,
+        )
+        self._raise_for_status(response)
+        return response.text
+
     def _raise_for_status(self, response: requests.Response) -> None:
         status = response.status_code
         if 200 <= status < 300:

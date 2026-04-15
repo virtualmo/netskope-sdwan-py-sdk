@@ -6,18 +6,23 @@ from netskopesdwan import SDWANClient
 from netskopesdwan.exceptions import APIResponseError
 from netskopesdwan.models.resource import ResourceRecord
 from tests.fixtures import (
+    raw_object_fixture,
     resource_array_list_fixture,
     resource_detail_fixture,
     resource_envelope_list_fixture,
+    site_command_output_fixture,
 )
 
 
 def test_client_wires_read_only_managers() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
+    assert client.audit_events.resource_path == "/auditevents"
     assert client.client_templates.resource_path == "/client-templates"
     assert client.clients.resource_path == "/clients"
     assert client.cloud_accounts.resource_path == "/cloud-accounts"
+    assert client.controller_operators.resource_path == "/controller-operators"
+    assert client.controllers.resource_path == "/controllers"
     assert client.device_groups.resource_path == "/device-groups"
     assert client.gateway_groups.resource_path == "/gateway-groups"
     assert client.gateway_templates.resource_path == "/gateway-templates"
@@ -25,6 +30,8 @@ def test_client_wires_read_only_managers() -> None:
     assert client.ntp_configs.resource_path == "/ntp-configs"
     assert client.overlay_tags.resource_path == "/overlay-tags"
     assert client.segments.resource_path == "/segments"
+    assert client.site_commands.resource_path == "/site-commands"
+    assert client.software.resource_path == "/software-versions"
     assert client.tenants.resource_path == "/tenants"
     assert client.user_groups.resource_path == "/user-groups"
     assert client.users.resource_path == "/users"
@@ -98,6 +105,21 @@ def test_client_templates_list_parses_paginated_envelope() -> None:
     assert [item.id for item in items] == ["res-001", "res-002"]
 
 
+def test_audit_events_list_parses_top_level_array() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = resource_array_list_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/auditevents"
+        return fixture
+
+    client.transport.get = fake_get
+
+    items = client.audit_events.list()
+
+    assert [item.id for item in items] == ["res-001", "res-002"]
+
+
 def test_clients_get_parses_detail_object() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
     fixture = resource_detail_fixture()
@@ -127,6 +149,54 @@ def test_cloud_accounts_list_fails_when_payload_shape_is_invalid() -> None:
         client.cloud_accounts.list()
 
     assert "Cloud account list response must be a top-level JSON array or object." in str(
+        excinfo.value
+    )
+
+
+def test_controller_operators_get_parses_detail_object() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = resource_detail_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/controller-operators/op-001"
+        return fixture
+
+    client.transport.get = fake_get
+
+    item = client.controller_operators.get("op-001")
+
+    assert item.id == "res-001"
+    assert item.raw == fixture
+
+
+def test_controllers_get_operator_status_parses_raw_object() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = raw_object_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/controllers/controller-001/operator_status"
+        return fixture
+
+    client.transport.get = fake_get
+
+    payload = client.controllers.get_operator_status("controller-001")
+
+    assert payload == fixture
+
+
+def test_controllers_get_operator_status_fails_on_non_object_payload() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/controllers/controller-001/operator_status"
+        return ["invalid"]
+
+    client.transport.get = fake_get
+
+    with pytest.raises(APIResponseError) as excinfo:
+        client.controllers.get_operator_status("controller-001")
+
+    assert "Controller operator status response must be a top-level JSON object." in str(
         excinfo.value
     )
 
@@ -176,6 +246,66 @@ def test_gateway_templates_get_fails_when_id_is_missing() -> None:
         client.gateway_templates.get("template-001")
 
     assert "required 'id' field" in str(excinfo.value)
+
+
+def test_site_commands_get_output_returns_text() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = site_command_output_fixture()
+
+    def fake_get_text(path: str, *, params=None):
+        assert path == "/site-command/cmd-001/output/stdout"
+        return fixture
+
+    client.transport.get_text = fake_get_text
+
+    payload = client.site_commands.get_output("cmd-001", "stdout")
+
+    assert payload == fixture
+
+
+def test_site_commands_get_parses_detail_object() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = resource_detail_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/site-commands/cmd-001"
+        return fixture
+
+    client.transport.get = fake_get
+
+    item = client.site_commands.get("cmd-001")
+
+    assert item.id == "res-001"
+
+
+def test_software_list_versions_parses_top_level_array() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = resource_array_list_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/software-versions"
+        return fixture
+
+    client.transport.get = fake_get
+
+    items = client.software.list_versions()
+
+    assert [item.id for item in items] == ["res-001", "res-002"]
+
+
+def test_software_list_downloads_parses_paginated_envelope() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = resource_envelope_list_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/software-downloads"
+        return fixture
+
+    client.transport.get = fake_get
+
+    items = client.software.list_downloads()
+
+    assert [item.id for item in items] == ["res-001", "res-002"]
 
 
 def test_tenants_list_parses_top_level_array() -> None:
