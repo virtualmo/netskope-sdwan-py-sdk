@@ -1,6 +1,6 @@
 # netskope-sdwan-py-sdk
 
-`netskope-sdwan-py-sdk` is an API-first Python SDK scaffold for Netskope SD-WAN.
+`netskope-sdwan-py-sdk` is an API-first, read-only Python SDK scaffold for Netskope SD-WAN.
 
 This first milestone focuses on:
 
@@ -50,6 +50,8 @@ python examples/basic_gateways.py
 ```
 
 ## Usage
+
+Current V1.5 usage is read-only.
 
 Direct API URL:
 
@@ -109,6 +111,7 @@ Implemented in this milestone:
 
 - `client.gateways.list()`
 - `client.gateways.get(gateway_id)`
+- read-only special methods for `address_groups.list_address_objects(group_id)`, `controllers.get_operator_status(controller_id)`, `site_commands.get_output(command_id, name)`, `applications.list_*() / get_custom_app(id)`, `software.list_versions() / list_downloads()`, and `jwks.get()`
 - read-only managers for `address_groups`, `applications`, `audit_events`, `ca_certificates`, `client_templates`, `clients`, `cloud_accounts`, `controller_operators`, `controllers`, `device_groups`, `gateway_groups`, `gateway_templates`, `inventory_devices`, `jwks`, `ntp_configs`, `overlay_tags`, `policies`, `radius_servers`, `segments`, `site_commands`, `software`, `tenants`, `user_groups`, `users`, and `vpn_peers`
 
 Not implemented yet:

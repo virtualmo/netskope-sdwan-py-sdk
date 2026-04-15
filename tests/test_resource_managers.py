@@ -431,6 +431,26 @@ def test_jwks_get_fails_on_non_object_payload() -> None:
     assert "Jwks response must be a top-level JSON object." in str(excinfo.value)
 
 
+@pytest.mark.parametrize(
+    ("manager_attr", "call_args"),
+    [
+        ("audit_events", ("evt-001",)),
+        ("inventory_devices", ("inv-001",)),
+        ("software", ("ver-001",)),
+    ],
+)
+def test_list_only_managers_raise_clear_attribute_error(
+    manager_attr: str, call_args: tuple[str, ...]
+) -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    manager = getattr(client, manager_attr)
+
+    with pytest.raises(AttributeError) as excinfo:
+        manager.get(*call_args)
+
+    assert "does not support get(id)" in str(excinfo.value)
+
+
 def test_tenants_list_parses_top_level_array() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
     fixture = resource_array_list_fixture()
