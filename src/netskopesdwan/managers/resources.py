@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..exceptions import APIResponseError
+from ..exceptions import APIResponseError, ValidationError
 from ..models.resource import ResourceRecord
 from .base import BaseManager
 
@@ -49,6 +49,34 @@ class InventoryDeviceManager(ReadOnlyResourceManager):
 class AuditEventManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(transport, resource_path=f"{API_V2_PREFIX}/auditevents", resource_label="audit event")
+
+    def list(
+        self,
+        *,
+        created_at_from: str,
+        created_at_to: str,
+        type: str | None = None,
+        subtype: str | None = None,
+        activity: str | None = None,
+    ) -> list[ResourceRecord]:
+        if not created_at_from:
+            raise ValidationError("audit_events.list(...) requires created_at_from.")
+        if not created_at_to:
+            raise ValidationError("audit_events.list(...) requires created_at_to.")
+
+        filter_expression = _build_audit_event_filter(
+            created_at_from=created_at_from,
+            created_at_to=created_at_to,
+            type=type,
+            subtype=subtype,
+            activity=activity,
+        )
+        payload = self._get(params={"filter": filter_expression})
+        return _parse_resource_list_response(
+            payload,
+            resource_label=self.resource_label,
+            list_field_candidates=self.list_field_candidates,
+        )
 
     def get(self, resource_id: str) -> ResourceRecord:
         raise AttributeError(
@@ -313,6 +341,27 @@ def _parse_raw_object_response(payload: Any, *, resource_label: str) -> dict[str
     if not isinstance(payload, dict):
         raise APIResponseError(f"{_label(resource_label)} response must be a top-level JSON object.")
     return payload
+
+
+def _build_audit_event_filter(
+    *,
+    created_at_from: str,
+    created_at_to: str,
+    type: str | None,
+    subtype: str | None,
+    activity: str | None,
+) -> str:
+    parts = [
+        f'created_at>="{created_at_from}"',
+        f'created_at<="{created_at_to}"',
+    ]
+    if type:
+        parts.append(f"type: {type}")
+    if subtype:
+        parts.append(f"subtype: {subtype}")
+    if activity:
+        parts.append(f"activity: {activity}")
+    return " AND ".join(parts)
 
 
 def _label(value: str) -> str:

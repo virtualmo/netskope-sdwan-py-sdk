@@ -53,6 +53,8 @@ python examples/basic_gateways.py
 
 Current V1.5 usage is read-only.
 
+`client.audit_events.list(...)` requires a bounded `created_at_from` / `created_at_to` query window.
+
 Direct API URL:
 
 ```python

@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from netskopesdwan import SDWANClient
-from netskopesdwan.exceptions import APIResponseError
+from netskopesdwan.exceptions import APIResponseError, ValidationError
 from netskopesdwan.models.resource import ResourceRecord
 from tests.fixtures import (
     jwks_fixture,
@@ -183,13 +183,88 @@ def test_audit_events_list_parses_top_level_array() -> None:
 
     def fake_get(path: str, *, params=None):
         assert path == "/v2/auditevents"
+        assert params == {
+            "filter": 'created_at>="2024-12-01T00:00:00-04:00" AND '
+            'created_at<="2025-01-10T23:59:59-05:00"'
+        }
         return fixture
 
     client.transport.get = fake_get
 
-    items = client.audit_events.list()
+    items = client.audit_events.list(
+        created_at_from="2024-12-01T00:00:00-04:00",
+        created_at_to="2025-01-10T23:59:59-05:00",
+    )
 
     assert [item.id for item in items] == ["res-001", "res-002"]
+
+
+def test_audit_events_list_includes_optional_filters() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = resource_array_list_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/v2/auditevents"
+        assert params == {
+            "filter": 'created_at>="2024-12-01T00:00:00-04:00" AND '
+            'created_at<="2025-01-10T23:59:59-05:00" AND '
+            "type: AUDIT AND subtype: AUDIT_TENANT AND activity: LOGIN"
+        }
+        return fixture
+
+    client.transport.get = fake_get
+
+    items = client.audit_events.list(
+        created_at_from="2024-12-01T00:00:00-04:00",
+        created_at_to="2025-01-10T23:59:59-05:00",
+        type="AUDIT",
+        subtype="AUDIT_TENANT",
+        activity="LOGIN",
+    )
+
+    assert [item.id for item in items] == ["res-001", "res-002"]
+
+
+def test_audit_events_list_requires_created_at_from() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+
+    with pytest.raises(ValidationError) as excinfo:
+        client.audit_events.list(
+            created_at_from="",
+            created_at_to="2025-01-10T23:59:59-05:00",
+        )
+
+    assert "requires created_at_from" in str(excinfo.value)
+
+
+def test_audit_events_list_requires_created_at_to() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+
+    with pytest.raises(ValidationError) as excinfo:
+        client.audit_events.list(
+            created_at_from="2024-12-01T00:00:00-04:00",
+            created_at_to="",
+        )
+
+    assert "requires created_at_to" in str(excinfo.value)
+
+
+def test_audit_events_list_fails_on_malformed_payload() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/v2/auditevents"
+        return {"data": {"id": "evt-001"}}
+
+    client.transport.get = fake_get
+
+    with pytest.raises(APIResponseError) as excinfo:
+        client.audit_events.list(
+            created_at_from="2024-12-01T00:00:00-04:00",
+            created_at_to="2025-01-10T23:59:59-05:00",
+        )
+
+    assert "Audit event list response field 'data' must be a JSON array." in str(excinfo.value)
 
 
 def test_clients_get_parses_detail_object() -> None:
