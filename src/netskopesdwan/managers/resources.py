@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..exceptions import APIResponseError, ValidationError
+from ..models.download import DownloadResult
 from ..models.resource import ResourceRecord
 from .base import BaseManager
 
@@ -227,8 +228,8 @@ class SiteCommandManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(transport, resource_path=f"{API_V2_PREFIX}/site-commands", resource_label="site command")
 
-    def get_output(self, command_id: str, name: str) -> str:
-        return self._transport.get_text(f"{API_V2_PREFIX}/site-command/{command_id}/output/{name}")
+    def get_output(self, command_id: str, name: str) -> DownloadResult:
+        return self._transport.get_download(f"{API_V2_PREFIX}/site-command/{command_id}/output/{name}")
 
 
 class SoftwareManager(ReadOnlyResourceManager):

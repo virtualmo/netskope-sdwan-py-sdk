@@ -5,6 +5,7 @@ import json
 import pytest
 import requests
 
+from netskopesdwan.models.download import DownloadResult
 from netskopesdwan.exceptions import (
     APIResponseError,
     AuthenticationError,
@@ -104,21 +105,81 @@ def test_transport_request_raises_before_gateway_parsing_on_error_payload(monkey
     assert "Gateway lookup failed" in message
 
 
+def test_transport_get_download_preserves_bytes_and_headers(monkeypatch) -> None:
+    transport = Transport(
+        base_url="https://tenant.api.infiot.net",
+        api_token="TOKEN",
+        timeout=30,
+        verify_ssl=True,
+    )
+    response = _build_response(
+        status_code=200,
+        body=b"binary-output",
+        url="https://tenant.api.infiot.net/v2/site-command/cmd-001/output/stdout",
+        method="GET",
+        content_type="application/octet-stream",
+        headers={"Content-Disposition": 'attachment; filename="stdout.txt"'},
+    )
+
+    def fake_request(**kwargs):
+        return response
+
+    monkeypatch.setattr(transport.session, "request", fake_request)
+
+    result = transport.get_download("/v2/site-command/cmd-001/output/stdout")
+
+    assert isinstance(result, DownloadResult)
+    assert result.content == b"binary-output"
+    assert result.content_type == "application/octet-stream"
+    assert result.content_disposition == 'attachment; filename="stdout.txt"'
+    assert result.filename == "stdout.txt"
+
+
+def test_transport_get_download_preserves_json_error_handling(monkeypatch) -> None:
+    transport = Transport(
+        base_url="https://tenant.api.infiot.net",
+        api_token="TOKEN",
+        timeout=30,
+        verify_ssl=True,
+    )
+    response = _build_response(
+        status_code=404,
+        body=error_response_fixture(),
+        url="https://tenant.api.infiot.net/v2/site-command/cmd-001/output/stdout",
+        method="GET",
+    )
+
+    def fake_request(**kwargs):
+        return response
+
+    monkeypatch.setattr(transport.session, "request", fake_request)
+
+    with pytest.raises(NotFoundError) as excinfo:
+        transport.get_download("/v2/site-command/cmd-001/output/stdout")
+
+    assert "error_code=GW_NOT_FOUND" in str(excinfo.value)
+
+
 def _build_response(
     *,
     status_code: int,
-    body: dict[str, str] | str,
+    body: dict[str, str] | str | bytes,
     url: str,
     method: str,
     content_type: str = "application/json",
+    headers: dict[str, str] | None = None,
 ) -> requests.Response:
     response = requests.Response()
     response.status_code = status_code
     response.url = url
     response.request = requests.Request(method=method, url=url).prepare()
     response.headers["Content-Type"] = content_type
+    if headers:
+        response.headers.update(headers)
     if isinstance(body, dict):
         response._content = json.dumps(body).encode("utf-8")
+    elif isinstance(body, bytes):
+        response._content = body
     else:
         response._content = body.encode("utf-8")
     return response

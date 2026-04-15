@@ -4,6 +4,7 @@ import os
 from typing import Any, Callable
 
 from netskopesdwan import SDWANClient
+from netskopesdwan.models import DownloadResult
 
 
 def env(name: str, default: str | None = None) -> str | None:
@@ -34,9 +35,18 @@ def summarize(value: Any) -> str:
         keys = list(value.keys())[:10]
         return f"dict(keys={keys})"
 
+    if isinstance(value, DownloadResult):
+        return (
+            f"DownloadResult(len={len(value.content)}, "
+            f"content_type={value.content_type!r}, filename={value.filename!r})"
+        )
+
     if isinstance(value, str):
         short = value[:120].replace("\n", "\\n")
         return f"str(len={len(value)}, preview={short!r})"
+
+    if isinstance(value, bytes):
+        return f"bytes(len={len(value)})"
 
     return repr(value)
 

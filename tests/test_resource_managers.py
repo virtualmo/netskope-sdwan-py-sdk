@@ -4,6 +4,7 @@ import pytest
 
 from netskopesdwan import SDWANClient
 from netskopesdwan.exceptions import APIResponseError, ValidationError
+from netskopesdwan.models.download import DownloadResult
 from netskopesdwan.models.resource import ResourceRecord
 from tests.fixtures import (
     jwks_fixture,
@@ -420,15 +421,22 @@ def test_site_commands_get_output_returns_text() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
     fixture = site_command_output_fixture()
 
-    def fake_get_text(path: str, *, params=None):
+    def fake_get_download(path: str, *, params=None):
         assert path == "/v2/site-command/cmd-001/output/stdout"
-        return fixture
+        return DownloadResult(
+            content=fixture,
+            content_type="application/octet-stream",
+            content_disposition='attachment; filename="stdout.txt"',
+            filename="stdout.txt",
+        )
 
-    client.transport.get_text = fake_get_text
+    client.transport.get_download = fake_get_download
 
     payload = client.site_commands.get_output("cmd-001", "stdout")
 
-    assert payload == fixture
+    assert isinstance(payload, DownloadResult)
+    assert payload.content == fixture
+    assert payload.filename == "stdout.txt"
 
 
 def test_site_commands_get_parses_detail_object() -> None:

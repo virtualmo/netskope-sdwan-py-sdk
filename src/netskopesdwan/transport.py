@@ -4,6 +4,7 @@ from typing import Any
 
 import requests
 
+from .models.download import DownloadResult
 from .exceptions import (
     APIResponseError,
     AuthenticationError,
@@ -74,6 +75,23 @@ class Transport:
         self._raise_for_status(response)
         return response.text
 
+    def get_download(self, path: str, *, params: dict[str, Any] | None = None) -> DownloadResult:
+        response = self.session.request(
+            method="GET",
+            url=f"{self.base_url}/{path.lstrip('/')}",
+            params=params,
+            timeout=self.timeout,
+            verify=self.verify_ssl,
+        )
+        self._raise_for_status(response)
+        content_disposition = response.headers.get("Content-Disposition")
+        return DownloadResult(
+            content=response.content,
+            content_type=response.headers.get("Content-Type"),
+            content_disposition=content_disposition,
+            filename=_extract_filename(content_disposition),
+        )
+
     def _raise_for_status(self, response: requests.Response) -> None:
         status = response.status_code
         if 200 <= status < 300:
@@ -133,3 +151,17 @@ def _build_error_message(response: requests.Response) -> str:
         extras.append(f"request_id={request_id}")
     suffix = f" ({', '.join(extras)})" if extras else ""
     return f"{method} {url} returned HTTP {response.status_code}: {detail}{suffix}"
+
+
+def _extract_filename(content_disposition: str | None) -> str | None:
+    if not content_disposition:
+        return None
+    parts = [part.strip() for part in content_disposition.split(";")]
+    for part in parts:
+        if not part.lower().startswith("filename="):
+            continue
+        value = part.split("=", 1)[1].strip()
+        if len(value) >= 2 and value[0] == value[-1] == '"':
+            value = value[1:-1]
+        return value or None
+    return None
