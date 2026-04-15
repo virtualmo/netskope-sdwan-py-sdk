@@ -1,3 +1,4 @@
 from .gateway import Gateway
+from .resource import ResourceRecord
 
-__all__ = ["Gateway"]
+__all__ = ["Gateway", "ResourceRecord"]

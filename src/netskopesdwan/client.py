@@ -2,6 +2,18 @@ from __future__ import annotations
 
 from .config import ClientSettings, load_settings
 from .managers.gateways import GatewayManager
+from .managers.resources import (
+    DeviceGroupManager,
+    GatewayGroupManager,
+    GatewayTemplateManager,
+    InventoryDeviceManager,
+    NTPConfigManager,
+    OverlayTagManager,
+    PolicyManager,
+    RadiusServerManager,
+    SegmentManager,
+    VPNPeerManager,
+)
 from .tenant_resolution import ResolutionResult, resolve_api_base_url
 from .transport import Transport
 
@@ -42,3 +54,13 @@ class SDWANClient:
         )
 
         self.gateways = GatewayManager(self.transport)
+        self.device_groups = DeviceGroupManager(self.transport)
+        self.gateway_groups = GatewayGroupManager(self.transport)
+        self.gateway_templates = GatewayTemplateManager(self.transport)
+        self.inventory_devices = InventoryDeviceManager(self.transport)
+        self.ntp_configs = NTPConfigManager(self.transport)
+        self.overlay_tags = OverlayTagManager(self.transport)
+        self.segments = SegmentManager(self.transport)
+        self.vpn_peers = VPNPeerManager(self.transport)
+        self.policies = PolicyManager(self.transport)
+        self.radius_servers = RadiusServerManager(self.transport)

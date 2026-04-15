@@ -8,7 +8,7 @@ This first milestone focuses on:
 - `SDWANClient`
 - centralized HTTP transport
 - tenant and base URL normalization
-- minimal gateway manager support
+- read-only GET managers for gateways, groups, templates, inventory, network, policy, and RADIUS resources
 - lightweight tests with no live API dependency
 
 ## Requirements
@@ -109,10 +109,11 @@ Implemented in this milestone:
 
 - `client.gateways.list()`
 - `client.gateways.get(gateway_id)`
+- read-only managers for `device_groups`, `gateway_groups`, `gateway_templates`, `inventory_devices`, `ntp_configs`, `overlay_tags`, `segments`, `vpn_peers`, `policies`, and `radius_servers`
 
 Not implemented yet:
 
-- other managers
+- write operations
 - live DNS/CNAME discovery
 - async support
 - CLI or MCP integrations

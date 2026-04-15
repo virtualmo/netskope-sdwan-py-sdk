@@ -55,3 +55,24 @@ def error_response_fixture() -> dict[str, str]:
         "error_code": "GW_NOT_FOUND",
         "request_id": "req-sanitized-001",
     }
+
+
+def resource_envelope_list_fixture() -> dict[str, Any]:
+    return {
+        "page_info": {"page": 1, "page_size": 2},
+        "data": [
+            {"id": "res-001", "name": "Resource One"},
+            {"id": "res-002", "name": "Resource Two", "description": "ignored"},
+        ],
+    }
+
+
+def resource_array_list_fixture() -> list[dict[str, Any]]:
+    return [
+        {"id": "res-001", "name": "Resource One"},
+        {"id": "res-002", "name": "Resource Two"},
+    ]
+
+
+def resource_detail_fixture() -> dict[str, Any]:
+    return {"id": "res-001", "name": "Resource One", "host": "redacted"}
