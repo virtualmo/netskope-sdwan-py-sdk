@@ -1,5 +1,4 @@
 from netskopesdwan import SDWANClient
-from netskopesdwan.exceptions import ResolutionError
 
 
 def main() -> None:
@@ -17,17 +16,14 @@ def main() -> None:
     )
     print("Resolved from goskope URL:", overridden_client.resolved_base_url)
 
-    # This pattern is supported, but may raise a ResolutionError when the exact SD-WAN
-    # tenant hostname cannot be derived safely from the goskope tenant name alone.
-    try:
-        unresolved_client = SDWANClient(
-            tenant_url="customer.de.goskope.com",
-            api_token="TOKEN",
-        )
-        print(unresolved_client.gateways.list())
-    except ResolutionError as exc:
-        print("Resolution guidance:")
-        print(exc)
+    # Generic goskope hosts such as customer.goskope.com are not supported in V1
+    # unless the region can be determined deterministically. Use base_url directly
+    # for those tenants until DNS/CNAME-based discovery is implemented.
+    #
+    # unsupported_client = SDWANClient(
+    #     tenant_url="customer.goskope.com",
+    #     api_token="TOKEN",
+    # )
 
 
 if __name__ == "__main__":

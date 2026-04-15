@@ -78,7 +78,7 @@ client = SDWANClient(
 
 ## Important Tenant Resolution Note
 
-For goskope tenant URLs, the SDK can often determine the SD-WAN region, but it will not silently guess the final SD-WAN hostname when the SD-WAN tenant name may differ from the goskope tenant name.
+For goskope tenant URLs, V1 currently supports deterministic region mapping for known suffixes such as `.de.goskope.com`, `.eu.goskope.com`, and `.au.goskope.com`. Generic `*.goskope.com` tenant URLs are not yet supported unless you provide the direct SD-WAN `base_url`.
 
 Example:
 
@@ -91,13 +91,13 @@ client = SDWANClient(
 )
 ```
 
-Or, if you know the SD-WAN tenant name:
+Or, if you know the SD-WAN tenant name and are using a supported deterministic goskope suffix:
 
 ```python
 from netskopesdwan import SDWANClient
 
 client = SDWANClient(
-    tenant_url="customer.goskope.com",
+    tenant_url="customer.de.goskope.com",
     sdwan_tenant_name="legacy123",
     api_token="TOKEN",
 )
