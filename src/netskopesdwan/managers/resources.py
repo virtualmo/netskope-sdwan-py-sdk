@@ -55,6 +55,19 @@ class AuditEventManager(ReadOnlyResourceManager):
         )
 
 
+class AddressGroupManager(ReadOnlyResourceManager):
+    def __init__(self, transport) -> None:
+        super().__init__(transport, resource_path="/address-groups", resource_label="address group")
+
+    def list_address_objects(self, group_id: str) -> list[ResourceRecord]:
+        payload = self._get(f"/address-groups/{group_id}/address-objects")
+        return _parse_resource_list_response(
+            payload,
+            resource_label="address object",
+            list_field_candidates=self.list_field_candidates,
+        )
+
+
 class DeviceGroupManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(transport, resource_path="/device-groups", resource_label="device group")
@@ -77,6 +90,50 @@ class ClientManager(ReadOnlyResourceManager):
 class CloudAccountManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(transport, resource_path="/cloud-accounts", resource_label="cloud account")
+
+
+class ApplicationManager(ReadOnlyResourceManager):
+    def __init__(self, transport) -> None:
+        super().__init__(transport, resource_path="/custom-apps", resource_label="custom app")
+
+    def list_categories(self) -> list[ResourceRecord]:
+        payload = self._get("/app-categories")
+        return _parse_resource_list_response(
+            payload,
+            resource_label="app category",
+            list_field_candidates=self.list_field_candidates,
+        )
+
+    def list_custom_apps(self) -> list[ResourceRecord]:
+        return self.list()
+
+    def get_custom_app(self, resource_id: str) -> ResourceRecord:
+        return self.get(resource_id)
+
+    def list_qosmos_apps(self) -> list[ResourceRecord]:
+        payload = self._get("/qosmos-apps")
+        return _parse_resource_list_response(
+            payload,
+            resource_label="qosmos app",
+            list_field_candidates=self.list_field_candidates,
+        )
+
+    def list_webroot_categories(self) -> list[ResourceRecord]:
+        payload = self._get("/webroot-categories")
+        return _parse_resource_list_response(
+            payload,
+            resource_label="webroot category",
+            list_field_candidates=self.list_field_candidates,
+        )
+
+
+class CACertificateManager(ReadOnlyResourceManager):
+    def __init__(self, transport) -> None:
+        super().__init__(
+            transport,
+            resource_path="/ca-certificates",
+            resource_label="ca certificate",
+        )
 
 
 class ControllerOperatorManager(ReadOnlyResourceManager):
@@ -192,6 +249,14 @@ class RadiusServerManager(ReadOnlyResourceManager):
             resource_path="/radius-servers",
             resource_label="radius server",
         )
+
+
+class JWKSManager(BaseManager):
+    resource_path = "/jwks.json"
+
+    def get(self) -> dict[str, Any]:
+        payload = self._get("/jwks.json")
+        return _parse_raw_object_response(payload, resource_label="jwks")
 
 
 def _parse_resource_list_response(

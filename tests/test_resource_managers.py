@@ -6,6 +6,7 @@ from netskopesdwan import SDWANClient
 from netskopesdwan.exceptions import APIResponseError
 from netskopesdwan.models.resource import ResourceRecord
 from tests.fixtures import (
+    jwks_fixture,
     raw_object_fixture,
     resource_array_list_fixture,
     resource_detail_fixture,
@@ -17,7 +18,10 @@ from tests.fixtures import (
 def test_client_wires_read_only_managers() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
+    assert client.address_groups.resource_path == "/address-groups"
     assert client.audit_events.resource_path == "/auditevents"
+    assert client.applications.resource_path == "/custom-apps"
+    assert client.ca_certificates.resource_path == "/ca-certificates"
     assert client.client_templates.resource_path == "/client-templates"
     assert client.clients.resource_path == "/clients"
     assert client.cloud_accounts.resource_path == "/cloud-accounts"
@@ -27,6 +31,7 @@ def test_client_wires_read_only_managers() -> None:
     assert client.gateway_groups.resource_path == "/gateway-groups"
     assert client.gateway_templates.resource_path == "/gateway-templates"
     assert client.inventory_devices.resource_path == "/inventory-devices"
+    assert client.jwks.resource_path == "/jwks.json"
     assert client.ntp_configs.resource_path == "/ntp-configs"
     assert client.overlay_tags.resource_path == "/overlay-tags"
     assert client.segments.resource_path == "/segments"
@@ -55,6 +60,42 @@ def test_device_groups_list_parses_paginated_envelope() -> None:
     assert [item.id for item in items] == ["res-001", "res-002"]
     assert items[0].name == "Resource One"
     assert items[1].raw == fixture["data"][1]
+
+
+def test_address_groups_list_and_get_parse_resource_payloads() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    list_fixture = resource_array_list_fixture()
+    detail_fixture = resource_detail_fixture()
+
+    def fake_get(path: str, *, params=None):
+        if path == "/address-groups":
+            return list_fixture
+        if path == "/address-groups/ag-001":
+            return detail_fixture
+        raise AssertionError(f"Unexpected path: {path}")
+
+    client.transport.get = fake_get
+
+    items = client.address_groups.list()
+    item = client.address_groups.get("ag-001")
+
+    assert [entry.id for entry in items] == ["res-001", "res-002"]
+    assert item.id == "res-001"
+
+
+def test_address_groups_list_address_objects_parses_nested_resource_list() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = resource_envelope_list_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/address-groups/ag-001/address-objects"
+        return fixture
+
+    client.transport.get = fake_get
+
+    items = client.address_groups.list_address_objects("ag-001")
+
+    assert [entry.id for entry in items] == ["res-001", "res-002"]
 
 
 def test_policies_list_parses_top_level_array() -> None:
@@ -103,6 +144,37 @@ def test_client_templates_list_parses_paginated_envelope() -> None:
     items = client.client_templates.list()
 
     assert [item.id for item in items] == ["res-001", "res-002"]
+
+
+def test_applications_helpers_parse_supported_endpoints() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    envelope_fixture = resource_envelope_list_fixture()
+    array_fixture = resource_array_list_fixture()
+    detail_fixture = resource_detail_fixture()
+
+    def fake_get(path: str, *, params=None):
+        if path == "/app-categories":
+            return array_fixture
+        if path == "/custom-apps":
+            return envelope_fixture
+        if path == "/custom-apps/app-001":
+            return detail_fixture
+        if path == "/qosmos-apps":
+            return array_fixture
+        if path == "/webroot-categories":
+            return array_fixture
+        raise AssertionError(f"Unexpected path: {path}")
+
+    client.transport.get = fake_get
+
+    assert [item.id for item in client.applications.list_categories()] == ["res-001", "res-002"]
+    assert [item.id for item in client.applications.list_custom_apps()] == ["res-001", "res-002"]
+    assert client.applications.get_custom_app("app-001").id == "res-001"
+    assert [item.id for item in client.applications.list_qosmos_apps()] == ["res-001", "res-002"]
+    assert [item.id for item in client.applications.list_webroot_categories()] == [
+        "res-001",
+        "res-002",
+    ]
 
 
 def test_audit_events_list_parses_top_level_array() -> None:
@@ -248,6 +320,27 @@ def test_gateway_templates_get_fails_when_id_is_missing() -> None:
     assert "required 'id' field" in str(excinfo.value)
 
 
+def test_ca_certificates_list_and_get_parse_resource_payloads() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    list_fixture = resource_envelope_list_fixture()
+    detail_fixture = resource_detail_fixture()
+
+    def fake_get(path: str, *, params=None):
+        if path == "/ca-certificates":
+            return list_fixture
+        if path == "/ca-certificates/ca-001":
+            return detail_fixture
+        raise AssertionError(f"Unexpected path: {path}")
+
+    client.transport.get = fake_get
+
+    items = client.ca_certificates.list()
+    item = client.ca_certificates.get("ca-001")
+
+    assert [entry.id for entry in items] == ["res-001", "res-002"]
+    assert item.id == "res-001"
+
+
 def test_site_commands_get_output_returns_text() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
     fixture = site_command_output_fixture()
@@ -306,6 +399,36 @@ def test_software_list_downloads_parses_paginated_envelope() -> None:
     items = client.software.list_downloads()
 
     assert [item.id for item in items] == ["res-001", "res-002"]
+
+
+def test_jwks_get_parses_raw_object() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = jwks_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/jwks.json"
+        return fixture
+
+    client.transport.get = fake_get
+
+    payload = client.jwks.get()
+
+    assert payload == fixture
+
+
+def test_jwks_get_fails_on_non_object_payload() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/jwks.json"
+        return ["invalid"]
+
+    client.transport.get = fake_get
+
+    with pytest.raises(APIResponseError) as excinfo:
+        client.jwks.get()
+
+    assert "Jwks response must be a top-level JSON object." in str(excinfo.value)
 
 
 def test_tenants_list_parses_top_level_array() -> None:

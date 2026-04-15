@@ -8,7 +8,7 @@ This first milestone focuses on:
 - `SDWANClient`
 - centralized HTTP transport
 - tenant and base URL normalization
-- read-only GET managers for gateways, audit, clients, controllers, site commands, software, tenant/identity, cloud accounts, groups, templates, inventory, network, policy, and RADIUS resources
+- read-only GET managers for gateways, addressing, applications, audit, certificates/auth, clients, controllers, site commands, software, tenant/identity, cloud accounts, groups, templates, inventory, network, policy, and RADIUS resources
 - lightweight tests with no live API dependency
 
 ## Requirements
@@ -109,7 +109,7 @@ Implemented in this milestone:
 
 - `client.gateways.list()`
 - `client.gateways.get(gateway_id)`
-- read-only managers for `audit_events`, `client_templates`, `clients`, `cloud_accounts`, `controller_operators`, `controllers`, `device_groups`, `gateway_groups`, `gateway_templates`, `inventory_devices`, `ntp_configs`, `overlay_tags`, `policies`, `radius_servers`, `segments`, `site_commands`, `software`, `tenants`, `user_groups`, `users`, and `vpn_peers`
+- read-only managers for `address_groups`, `applications`, `audit_events`, `ca_certificates`, `client_templates`, `clients`, `cloud_accounts`, `controller_operators`, `controllers`, `device_groups`, `gateway_groups`, `gateway_templates`, `inventory_devices`, `jwks`, `ntp_configs`, `overlay_tags`, `policies`, `radius_servers`, `segments`, `site_commands`, `software`, `tenants`, `user_groups`, `users`, and `vpn_peers`
 
 Not implemented yet:
 

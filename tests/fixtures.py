@@ -84,3 +84,15 @@ def raw_object_fixture() -> dict[str, Any]:
 
 def site_command_output_fixture() -> str:
     return "command output line 1\ncommand output line 2\n"
+
+
+def jwks_fixture() -> dict[str, Any]:
+    return {
+        "keys": [
+            {
+                "kid": "sanitized-key-1",
+                "kty": "RSA",
+                "use": "sig",
+            }
+        ]
+    }

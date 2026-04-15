@@ -3,7 +3,10 @@ from __future__ import annotations
 from .config import ClientSettings, load_settings
 from .managers.gateways import GatewayManager
 from .managers.resources import (
+    AddressGroupManager,
     AuditEventManager,
+    ApplicationManager,
+    CACertificateManager,
     ClientManager,
     ClientTemplateManager,
     CloudAccountManager,
@@ -13,6 +16,7 @@ from .managers.resources import (
     GatewayGroupManager,
     GatewayTemplateManager,
     InventoryDeviceManager,
+    JWKSManager,
     NTPConfigManager,
     OverlayTagManager,
     PolicyManager,
@@ -65,7 +69,10 @@ class SDWANClient:
         )
 
         self.gateways = GatewayManager(self.transport)
+        self.address_groups = AddressGroupManager(self.transport)
         self.audit_events = AuditEventManager(self.transport)
+        self.applications = ApplicationManager(self.transport)
+        self.ca_certificates = CACertificateManager(self.transport)
         self.client_templates = ClientTemplateManager(self.transport)
         self.clients = ClientManager(self.transport)
         self.cloud_accounts = CloudAccountManager(self.transport)
@@ -75,6 +82,7 @@ class SDWANClient:
         self.gateway_groups = GatewayGroupManager(self.transport)
         self.gateway_templates = GatewayTemplateManager(self.transport)
         self.inventory_devices = InventoryDeviceManager(self.transport)
+        self.jwks = JWKSManager(self.transport)
         self.ntp_configs = NTPConfigManager(self.transport)
         self.overlay_tags = OverlayTagManager(self.transport)
         self.segments = SegmentManager(self.transport)

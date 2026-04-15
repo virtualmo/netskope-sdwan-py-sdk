@@ -1,6 +1,9 @@
 from .gateways import GatewayManager
 from .resources import (
+    AddressGroupManager,
     AuditEventManager,
+    ApplicationManager,
+    CACertificateManager,
     ClientManager,
     ClientTemplateManager,
     CloudAccountManager,
@@ -10,6 +13,7 @@ from .resources import (
     GatewayGroupManager,
     GatewayTemplateManager,
     InventoryDeviceManager,
+    JWKSManager,
     NTPConfigManager,
     OverlayTagManager,
     PolicyManager,
@@ -27,7 +31,10 @@ from .resources import (
 __all__ = [
     "GatewayManager",
     "ReadOnlyResourceManager",
+    "AddressGroupManager",
     "AuditEventManager",
+    "ApplicationManager",
+    "CACertificateManager",
     "ClientTemplateManager",
     "ClientManager",
     "CloudAccountManager",
@@ -37,6 +44,7 @@ __all__ = [
     "GatewayGroupManager",
     "GatewayTemplateManager",
     "InventoryDeviceManager",
+    "JWKSManager",
     "NTPConfigManager",
     "OverlayTagManager",
     "PolicyManager",
