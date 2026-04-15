@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 from typing import Any, Callable
 
-
 from netskopesdwan import SDWANClient
 
 
@@ -47,7 +46,7 @@ def safe_call(label: str, func: Callable[[], Any]) -> Any | None:
         result = func()
         print(f"[OK]   {label}: {summarize(result)}")
         return result
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(f"[FAIL] {label}: {exc.__class__.__name__}: {exc}")
         return None
 
@@ -126,7 +125,7 @@ def main() -> None:
     if radius_id := first_id(radius_servers):
         safe_call(f"radius_servers.get({radius_id})", lambda: client.radius_servers.get(radius_id))
 
-    # Existing gateway manager
+    # Gateways
     print_header("Gateways")
 
     gateways = safe_call("gateways.list()", lambda: client.gateways.list())
@@ -171,7 +170,28 @@ def main() -> None:
     # Batch 3
     print_header("Audit / Controllers / Site Commands / Software")
 
-    safe_call("audit_events.list()", lambda: client.audit_events.list())
+    audit_from = env("NETSKOPESDWAN_AUDIT_FROM")
+    audit_to = env("NETSKOPESDWAN_AUDIT_TO")
+    audit_type = env("NETSKOPESDWAN_AUDIT_TYPE")
+    audit_subtype = env("NETSKOPESDWAN_AUDIT_SUBTYPE")
+    audit_activity = env("NETSKOPESDWAN_AUDIT_ACTIVITY")
+
+    if audit_from and audit_to:
+        safe_call(
+            "audit_events.list(...)",
+            lambda: client.audit_events.list(
+                created_at_from=audit_from,
+                created_at_to=audit_to,
+                type=audit_type,
+                subtype=audit_subtype,
+                activity=audit_activity,
+            ),
+        )
+    else:
+        print(
+            "[SKIP] audit_events.list(...): set NETSKOPESDWAN_AUDIT_FROM and "
+            "NETSKOPESDWAN_AUDIT_TO"
+        )
 
     controller_operators = safe_call(
         "controller_operators.list()",
