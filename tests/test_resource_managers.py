@@ -18,31 +18,31 @@ from tests.fixtures import (
 def test_client_wires_read_only_managers() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
-    assert client.address_groups.resource_path == "/address-groups"
-    assert client.audit_events.resource_path == "/auditevents"
-    assert client.applications.resource_path == "/custom-apps"
-    assert client.ca_certificates.resource_path == "/ca-certificates"
-    assert client.client_templates.resource_path == "/client-templates"
-    assert client.clients.resource_path == "/clients"
-    assert client.cloud_accounts.resource_path == "/cloud-accounts"
-    assert client.controller_operators.resource_path == "/controller-operators"
-    assert client.controllers.resource_path == "/controllers"
-    assert client.device_groups.resource_path == "/device-groups"
-    assert client.gateway_groups.resource_path == "/gateway-groups"
-    assert client.gateway_templates.resource_path == "/gateway-templates"
-    assert client.inventory_devices.resource_path == "/inventory-devices"
-    assert client.jwks.resource_path == "/jwks.json"
-    assert client.ntp_configs.resource_path == "/ntp-configs"
-    assert client.overlay_tags.resource_path == "/overlay-tags"
-    assert client.segments.resource_path == "/segments"
-    assert client.site_commands.resource_path == "/site-commands"
-    assert client.software.resource_path == "/software-versions"
-    assert client.tenants.resource_path == "/tenants"
-    assert client.user_groups.resource_path == "/user-groups"
-    assert client.users.resource_path == "/users"
-    assert client.vpn_peers.resource_path == "/vpnpeers"
-    assert client.policies.resource_path == "/policies"
-    assert client.radius_servers.resource_path == "/radius-servers"
+    assert client.address_groups.resource_path == "/v2/address-groups"
+    assert client.audit_events.resource_path == "/v2/auditevents"
+    assert client.applications.resource_path == "/v2/custom-apps"
+    assert client.ca_certificates.resource_path == "/v2/ca-certificates"
+    assert client.client_templates.resource_path == "/v2/client-templates"
+    assert client.clients.resource_path == "/v2/clients"
+    assert client.cloud_accounts.resource_path == "/v2/cloud-accounts"
+    assert client.controller_operators.resource_path == "/v2/controller-operators"
+    assert client.controllers.resource_path == "/v2/controllers"
+    assert client.device_groups.resource_path == "/v2/device-groups"
+    assert client.gateway_groups.resource_path == "/v2/gateway-groups"
+    assert client.gateway_templates.resource_path == "/v2/gateway-templates"
+    assert client.inventory_devices.resource_path == "/v2/inventory-devices"
+    assert client.jwks.resource_path == "/v2/jwks.json"
+    assert client.ntp_configs.resource_path == "/v2/ntp-configs"
+    assert client.overlay_tags.resource_path == "/v2/overlay-tags"
+    assert client.segments.resource_path == "/v2/segments"
+    assert client.site_commands.resource_path == "/v2/site-commands"
+    assert client.software.resource_path == "/v2/software-versions"
+    assert client.tenants.resource_path == "/v2/tenants"
+    assert client.user_groups.resource_path == "/v2/user-groups"
+    assert client.users.resource_path == "/v2/users"
+    assert client.vpn_peers.resource_path == "/v2/vpnpeers"
+    assert client.policies.resource_path == "/v2/policies"
+    assert client.radius_servers.resource_path == "/v2/radius-servers"
 
 
 def test_device_groups_list_parses_paginated_envelope() -> None:
@@ -50,7 +50,7 @@ def test_device_groups_list_parses_paginated_envelope() -> None:
     fixture = resource_envelope_list_fixture()
 
     def fake_get(path: str, *, params=None):
-        assert path == "/device-groups"
+        assert path == "/v2/device-groups"
         return fixture
 
     client.transport.get = fake_get
@@ -68,9 +68,9 @@ def test_address_groups_list_and_get_parse_resource_payloads() -> None:
     detail_fixture = resource_detail_fixture()
 
     def fake_get(path: str, *, params=None):
-        if path == "/address-groups":
+        if path == "/v2/address-groups":
             return list_fixture
-        if path == "/address-groups/ag-001":
+        if path == "/v2/address-groups/ag-001":
             return detail_fixture
         raise AssertionError(f"Unexpected path: {path}")
 
@@ -88,7 +88,7 @@ def test_address_groups_list_address_objects_parses_nested_resource_list() -> No
     fixture = resource_envelope_list_fixture()
 
     def fake_get(path: str, *, params=None):
-        assert path == "/address-groups/ag-001/address-objects"
+        assert path == "/v2/address-groups/ag-001/address-objects"
         return fixture
 
     client.transport.get = fake_get
@@ -103,7 +103,7 @@ def test_policies_list_parses_top_level_array() -> None:
     fixture = resource_array_list_fixture()
 
     def fake_get(path: str, *, params=None):
-        assert path == "/policies"
+        assert path == "/v2/policies"
         return fixture
 
     client.transport.get = fake_get
@@ -118,7 +118,7 @@ def test_radius_server_get_parses_detail_object() -> None:
     fixture = resource_detail_fixture()
 
     def fake_get(path: str, *, params=None):
-        assert path == "/radius-servers/rad-001"
+        assert path == "/v2/radius-servers/rad-001"
         return fixture
 
     client.transport.get = fake_get
@@ -136,7 +136,7 @@ def test_client_templates_list_parses_paginated_envelope() -> None:
     fixture = resource_envelope_list_fixture()
 
     def fake_get(path: str, *, params=None):
-        assert path == "/client-templates"
+        assert path == "/v2/client-templates"
         return fixture
 
     client.transport.get = fake_get
@@ -153,15 +153,15 @@ def test_applications_helpers_parse_supported_endpoints() -> None:
     detail_fixture = resource_detail_fixture()
 
     def fake_get(path: str, *, params=None):
-        if path == "/app-categories":
+        if path == "/v2/app-categories":
             return array_fixture
-        if path == "/custom-apps":
+        if path == "/v2/custom-apps":
             return envelope_fixture
-        if path == "/custom-apps/app-001":
+        if path == "/v2/custom-apps/app-001":
             return detail_fixture
-        if path == "/qosmos-apps":
+        if path == "/v2/qosmos-apps":
             return array_fixture
-        if path == "/webroot-categories":
+        if path == "/v2/webroot-categories":
             return array_fixture
         raise AssertionError(f"Unexpected path: {path}")
 
@@ -182,7 +182,7 @@ def test_audit_events_list_parses_top_level_array() -> None:
     fixture = resource_array_list_fixture()
 
     def fake_get(path: str, *, params=None):
-        assert path == "/auditevents"
+        assert path == "/v2/auditevents"
         return fixture
 
     client.transport.get = fake_get
@@ -197,7 +197,7 @@ def test_clients_get_parses_detail_object() -> None:
     fixture = resource_detail_fixture()
 
     def fake_get(path: str, *, params=None):
-        assert path == "/clients/client-001"
+        assert path == "/v2/clients/client-001"
         return fixture
 
     client.transport.get = fake_get
@@ -212,7 +212,7 @@ def test_cloud_accounts_list_fails_when_payload_shape_is_invalid() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
     def fake_get(path: str, *, params=None):
-        assert path == "/cloud-accounts"
+        assert path == "/v2/cloud-accounts"
         return "not-json-object"
 
     client.transport.get = fake_get
@@ -230,7 +230,7 @@ def test_controller_operators_get_parses_detail_object() -> None:
     fixture = resource_detail_fixture()
 
     def fake_get(path: str, *, params=None):
-        assert path == "/controller-operators/op-001"
+        assert path == "/v2/controller-operators/op-001"
         return fixture
 
     client.transport.get = fake_get
@@ -246,7 +246,7 @@ def test_controllers_get_operator_status_parses_raw_object() -> None:
     fixture = raw_object_fixture()
 
     def fake_get(path: str, *, params=None):
-        assert path == "/controllers/controller-001/operator_status"
+        assert path == "/v2/controllers/controller-001/operator_status"
         return fixture
 
     client.transport.get = fake_get
@@ -260,7 +260,7 @@ def test_controllers_get_operator_status_fails_on_non_object_payload() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
     def fake_get(path: str, *, params=None):
-        assert path == "/controllers/controller-001/operator_status"
+        assert path == "/v2/controllers/controller-001/operator_status"
         return ["invalid"]
 
     client.transport.get = fake_get
@@ -277,7 +277,7 @@ def test_segments_list_fails_when_envelope_list_field_is_missing() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
     def fake_get(path: str, *, params=None):
-        assert path == "/segments"
+        assert path == "/v2/segments"
         return {"page_info": {"page": 1}, "request_id": "req-001"}
 
     client.transport.get = fake_get
@@ -294,7 +294,7 @@ def test_vpn_peers_list_fails_when_list_field_type_is_invalid() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
     def fake_get(path: str, *, params=None):
-        assert path == "/vpnpeers"
+        assert path == "/v2/vpnpeers"
         return {"data": {"id": "vpn-001"}}
 
     client.transport.get = fake_get
@@ -309,7 +309,7 @@ def test_gateway_templates_get_fails_when_id_is_missing() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
     def fake_get(path: str, *, params=None):
-        assert path == "/gateway-templates/template-001"
+        assert path == "/v2/gateway-templates/template-001"
         return {"name": "Template One"}
 
     client.transport.get = fake_get
@@ -326,9 +326,9 @@ def test_ca_certificates_list_and_get_parse_resource_payloads() -> None:
     detail_fixture = resource_detail_fixture()
 
     def fake_get(path: str, *, params=None):
-        if path == "/ca-certificates":
+        if path == "/v2/ca-certificates":
             return list_fixture
-        if path == "/ca-certificates/ca-001":
+        if path == "/v2/ca-certificates/ca-001":
             return detail_fixture
         raise AssertionError(f"Unexpected path: {path}")
 
@@ -346,7 +346,7 @@ def test_site_commands_get_output_returns_text() -> None:
     fixture = site_command_output_fixture()
 
     def fake_get_text(path: str, *, params=None):
-        assert path == "/site-command/cmd-001/output/stdout"
+        assert path == "/v2/site-command/cmd-001/output/stdout"
         return fixture
 
     client.transport.get_text = fake_get_text
@@ -361,7 +361,7 @@ def test_site_commands_get_parses_detail_object() -> None:
     fixture = resource_detail_fixture()
 
     def fake_get(path: str, *, params=None):
-        assert path == "/site-commands/cmd-001"
+        assert path == "/v2/site-commands/cmd-001"
         return fixture
 
     client.transport.get = fake_get
@@ -376,7 +376,7 @@ def test_software_list_versions_parses_top_level_array() -> None:
     fixture = resource_array_list_fixture()
 
     def fake_get(path: str, *, params=None):
-        assert path == "/software-versions"
+        assert path == "/v2/software-versions"
         return fixture
 
     client.transport.get = fake_get
@@ -391,7 +391,7 @@ def test_software_list_downloads_parses_paginated_envelope() -> None:
     fixture = resource_envelope_list_fixture()
 
     def fake_get(path: str, *, params=None):
-        assert path == "/software-downloads"
+        assert path == "/v2/software-downloads"
         return fixture
 
     client.transport.get = fake_get
@@ -406,7 +406,7 @@ def test_jwks_get_parses_raw_object() -> None:
     fixture = jwks_fixture()
 
     def fake_get(path: str, *, params=None):
-        assert path == "/jwks.json"
+        assert path == "/v2/jwks.json"
         return fixture
 
     client.transport.get = fake_get
@@ -420,7 +420,7 @@ def test_jwks_get_fails_on_non_object_payload() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
     def fake_get(path: str, *, params=None):
-        assert path == "/jwks.json"
+        assert path == "/v2/jwks.json"
         return ["invalid"]
 
     client.transport.get = fake_get
@@ -456,7 +456,7 @@ def test_tenants_list_parses_top_level_array() -> None:
     fixture = resource_array_list_fixture()
 
     def fake_get(path: str, *, params=None):
-        assert path == "/tenants"
+        assert path == "/v2/tenants"
         return fixture
 
     client.transport.get = fake_get
@@ -470,7 +470,7 @@ def test_user_groups_get_fails_when_id_is_missing() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
     def fake_get(path: str, *, params=None):
-        assert path == "/user-groups/group-001"
+        assert path == "/v2/user-groups/group-001"
         return {"name": "Group One"}
 
     client.transport.get = fake_get
@@ -487,7 +487,7 @@ def test_users_list_fails_when_list_field_type_is_invalid() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
     def fake_get(path: str, *, params=None):
-        assert path == "/users"
+        assert path == "/v2/users"
         return {"data": {"id": "user-001"}}
 
     client.transport.get = fake_get

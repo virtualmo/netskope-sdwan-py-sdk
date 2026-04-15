@@ -6,6 +6,8 @@ from ..exceptions import APIResponseError
 from ..models.resource import ResourceRecord
 from .base import BaseManager
 
+API_V2_PREFIX = "/v2"
+
 
 class ReadOnlyResourceManager(BaseManager):
     resource_label = "resource"
@@ -33,7 +35,7 @@ class InventoryDeviceManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
-            resource_path="/inventory-devices",
+            resource_path=f"{API_V2_PREFIX}/inventory-devices",
             resource_label="inventory device",
         )
 
@@ -46,7 +48,7 @@ class InventoryDeviceManager(ReadOnlyResourceManager):
 
 class AuditEventManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/auditevents", resource_label="audit event")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/auditevents", resource_label="audit event")
 
     def get(self, resource_id: str) -> ResourceRecord:
         raise AttributeError(
@@ -57,10 +59,10 @@ class AuditEventManager(ReadOnlyResourceManager):
 
 class AddressGroupManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/address-groups", resource_label="address group")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/address-groups", resource_label="address group")
 
     def list_address_objects(self, group_id: str) -> list[ResourceRecord]:
-        payload = self._get(f"/address-groups/{group_id}/address-objects")
+        payload = self._get(f"{API_V2_PREFIX}/address-groups/{group_id}/address-objects")
         return _parse_resource_list_response(
             payload,
             resource_label="address object",
@@ -70,34 +72,34 @@ class AddressGroupManager(ReadOnlyResourceManager):
 
 class DeviceGroupManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/device-groups", resource_label="device group")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/device-groups", resource_label="device group")
 
 
 class ClientTemplateManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
-            resource_path="/client-templates",
+            resource_path=f"{API_V2_PREFIX}/client-templates",
             resource_label="client template",
         )
 
 
 class ClientManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/clients", resource_label="client")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/clients", resource_label="client")
 
 
 class CloudAccountManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/cloud-accounts", resource_label="cloud account")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/cloud-accounts", resource_label="cloud account")
 
 
 class ApplicationManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/custom-apps", resource_label="custom app")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/custom-apps", resource_label="custom app")
 
     def list_categories(self) -> list[ResourceRecord]:
-        payload = self._get("/app-categories")
+        payload = self._get(f"{API_V2_PREFIX}/app-categories")
         return _parse_resource_list_response(
             payload,
             resource_label="app category",
@@ -111,7 +113,7 @@ class ApplicationManager(ReadOnlyResourceManager):
         return self.get(resource_id)
 
     def list_qosmos_apps(self) -> list[ResourceRecord]:
-        payload = self._get("/qosmos-apps")
+        payload = self._get(f"{API_V2_PREFIX}/qosmos-apps")
         return _parse_resource_list_response(
             payload,
             resource_label="qosmos app",
@@ -119,7 +121,7 @@ class ApplicationManager(ReadOnlyResourceManager):
         )
 
     def list_webroot_categories(self) -> list[ResourceRecord]:
-        payload = self._get("/webroot-categories")
+        payload = self._get(f"{API_V2_PREFIX}/webroot-categories")
         return _parse_resource_list_response(
             payload,
             resource_label="webroot category",
@@ -131,7 +133,7 @@ class CACertificateManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
-            resource_path="/ca-certificates",
+            resource_path=f"{API_V2_PREFIX}/ca-certificates",
             resource_label="ca certificate",
         )
 
@@ -140,77 +142,77 @@ class ControllerOperatorManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
-            resource_path="/controller-operators",
+            resource_path=f"{API_V2_PREFIX}/controller-operators",
             resource_label="controller operator",
         )
 
 
 class ControllerManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/controllers", resource_label="controller")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/controllers", resource_label="controller")
 
     def get_operator_status(self, controller_id: str) -> dict[str, Any]:
-        payload = self._get(f"/controllers/{controller_id}/operator_status")
+        payload = self._get(f"{API_V2_PREFIX}/controllers/{controller_id}/operator_status")
         return _parse_raw_object_response(payload, resource_label="controller operator status")
 
 
 class GatewayGroupManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/gateway-groups", resource_label="gateway group")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/gateway-groups", resource_label="gateway group")
 
 
 class GatewayTemplateManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
-            resource_path="/gateway-templates",
+            resource_path=f"{API_V2_PREFIX}/gateway-templates",
             resource_label="gateway template",
         )
 
 
 class NTPConfigManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/ntp-configs", resource_label="ntp config")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/ntp-configs", resource_label="ntp config")
 
 
 class OverlayTagManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/overlay-tags", resource_label="overlay tag")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/overlay-tags", resource_label="overlay tag")
 
 
 class SegmentManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/segments", resource_label="segment")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/segments", resource_label="segment")
 
 
 class VPNPeerManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/vpnpeers", resource_label="vpn peer")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/vpnpeers", resource_label="vpn peer")
 
 
 class PolicyManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/policies", resource_label="policy")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/policies", resource_label="policy")
 
 
 class SiteCommandManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/site-commands", resource_label="site command")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/site-commands", resource_label="site command")
 
     def get_output(self, command_id: str, name: str) -> str:
-        return self._transport.get_text(f"/site-command/{command_id}/output/{name}")
+        return self._transport.get_text(f"{API_V2_PREFIX}/site-command/{command_id}/output/{name}")
 
 
 class SoftwareManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
-            resource_path="/software-versions",
+            resource_path=f"{API_V2_PREFIX}/software-versions",
             resource_label="software version",
         )
 
     def list_downloads(self) -> list[ResourceRecord]:
-        payload = self._get("/software-downloads")
+        payload = self._get(f"{API_V2_PREFIX}/software-downloads")
         return _parse_resource_list_response(
             payload,
             resource_label="software download",
@@ -229,33 +231,33 @@ class SoftwareManager(ReadOnlyResourceManager):
 
 class TenantManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/tenants", resource_label="tenant")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/tenants", resource_label="tenant")
 
 
 class UserGroupManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/user-groups", resource_label="user group")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/user-groups", resource_label="user group")
 
 
 class UserManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path="/users", resource_label="user")
+        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/users", resource_label="user")
 
 
 class RadiusServerManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
-            resource_path="/radius-servers",
+            resource_path=f"{API_V2_PREFIX}/radius-servers",
             resource_label="radius server",
         )
 
 
 class JWKSManager(BaseManager):
-    resource_path = "/jwks.json"
+    resource_path = f"{API_V2_PREFIX}/jwks.json"
 
     def get(self) -> dict[str, Any]:
-        payload = self._get("/jwks.json")
+        payload = self._get(f"{API_V2_PREFIX}/jwks.json")
         return _parse_raw_object_response(payload, resource_label="jwks")
 
 
