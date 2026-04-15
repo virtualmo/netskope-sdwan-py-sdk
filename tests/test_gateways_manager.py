@@ -4,9 +4,18 @@ import pytest
 
 from netskopesdwan import SDWANClient
 from netskopesdwan.exceptions import APIResponseError
-from netskopesdwan.managers.gateways import GATEWAYS_PATH, GATEWAY_BY_ID_PATH
+from netskopesdwan.managers.gateways import (
+    GATEWAYS_PATH,
+    GATEWAY_BY_ID_PATH,
+    GATEWAY_LOCALUI_PASSWORD_PATH,
+    GATEWAY_SSH_PASSWORD_PATH,
+)
 from netskopesdwan.models.gateway import Gateway
-from tests.fixtures import gateway_detail_response_fixture, gateway_list_response_fixture
+from tests.fixtures import (
+    gateway_detail_response_fixture,
+    gateway_list_response_fixture,
+    gateway_password_fixture,
+)
 
 
 def test_gateways_manager_list_parses_paginated_envelope() -> None:
@@ -110,3 +119,57 @@ def test_gateway_adapter_ignores_legacy_device_config_field() -> None:
     gateway = client.gateways.get("gw-001")
 
     assert gateway.device_config_raw is None
+
+
+def test_gateways_manager_password_helper_methods_are_available() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+
+    assert callable(client.gateways.get_localui_password)
+    assert callable(client.gateways.get_ssh_password)
+
+
+def test_gateways_manager_get_localui_password_parses_top_level_object() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = gateway_password_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == GATEWAY_LOCALUI_PASSWORD_PATH.format(id="gw-001")
+        return fixture
+
+    client.transport.get = fake_get
+
+    payload = client.gateways.get_localui_password("gw-001")
+
+    assert payload == fixture
+
+
+def test_gateways_manager_get_ssh_password_parses_top_level_object() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = gateway_password_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == GATEWAY_SSH_PASSWORD_PATH.format(id="gw-001")
+        return fixture
+
+    client.transport.get = fake_get
+
+    payload = client.gateways.get_ssh_password("gw-001")
+
+    assert payload == fixture
+
+
+def test_gateways_manager_password_helpers_fail_on_non_object_payload() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+
+    def fake_get(path: str, *, params=None):
+        assert path == GATEWAY_LOCALUI_PASSWORD_PATH.format(id="gw-001")
+        return ["invalid"]
+
+    client.transport.get = fake_get
+
+    with pytest.raises(APIResponseError) as excinfo:
+        client.gateways.get_localui_password("gw-001")
+
+    assert "Gateway local UI password response must be a top-level JSON object." in str(
+        excinfo.value
+    )

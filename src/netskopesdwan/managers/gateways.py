@@ -8,6 +8,8 @@ from .base import BaseManager
 
 GATEWAYS_PATH = "/v2/gateways"
 GATEWAY_BY_ID_PATH = "/v2/gateways/{id}"
+GATEWAY_LOCALUI_PASSWORD_PATH = "/v2/gateways/{id}/localui-password"
+GATEWAY_SSH_PASSWORD_PATH = "/v2/gateways/{id}/ssh-password"
 
 
 class GatewayManager(BaseManager):
@@ -26,6 +28,14 @@ class GatewayManager(BaseManager):
     def get(self, gateway_id: str) -> Gateway:
         payload = self._get(GATEWAY_BY_ID_PATH.format(id=gateway_id))
         return _parse_gateway_object_response(payload)
+
+    def get_localui_password(self, gateway_id: str) -> dict[str, Any]:
+        payload = self._get(GATEWAY_LOCALUI_PASSWORD_PATH.format(id=gateway_id))
+        return _parse_gateway_password_response(payload, password_type="local UI password")
+
+    def get_ssh_password(self, gateway_id: str) -> dict[str, Any]:
+        payload = self._get(GATEWAY_SSH_PASSWORD_PATH.format(id=gateway_id))
+        return _parse_gateway_password_response(payload, password_type="SSH password")
 
 
 def _parse_gateway_list_response(payload: Any) -> tuple[list[Gateway], dict[str, Any] | None]:
@@ -72,3 +82,11 @@ def _adapt_gateway(payload: Any) -> Gateway:
     if not isinstance(payload, dict):
         raise APIResponseError("Gateway payload items must be JSON objects.")
     return Gateway.from_dict(payload)
+
+
+def _parse_gateway_password_response(payload: Any, *, password_type: str) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        raise APIResponseError(
+            f"Gateway {password_type} response must be a top-level JSON object."
+        )
+    return payload

@@ -96,3 +96,10 @@ def jwks_fixture() -> dict[str, Any]:
             }
         ]
     }
+
+
+def gateway_password_fixture() -> dict[str, str]:
+    return {
+        "password": "sanitized-password",
+        "request_id": "req-password-001",
+    }
