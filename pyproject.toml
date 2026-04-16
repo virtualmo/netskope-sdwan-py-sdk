@@ -27,9 +27,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ns-melamin/netskope-sdwan-py-sdk"
-Repository = "https://github.com/ns-melamin/netskope-sdwan-py-sdk"
-Issues = "https://github.com/ns-melamin/netskope-sdwan-py-sdk/issues"
+Homepage = "https://github.com/virtualmo/netskope-sdwan-py-sdk"
+Repository = "https://github.com/virtualmo/netskope-sdwan-py-sdk"
+Issues = "https://github.com/virtualmo/netskope-sdwan-py-sdk"
 
 [project.optional-dependencies]
 dev = [
