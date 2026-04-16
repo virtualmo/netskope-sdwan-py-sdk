@@ -20,6 +20,7 @@ class SmokeTarget:
     skip_if: Any | None = None
     exception_classifier: Any | None = None
     try_multiple_seeds: bool = False
+    visible: bool = True
 
 
 @dataclass
@@ -319,6 +320,12 @@ def build_targets(
         ),
         SmokeTarget("gateways.list", "gateways.list()", lambda c, _: c.gateways.list()),
         SmokeTarget(
+            "gateways.list_prefer_up_for_monitoring",
+            "gateways.list(filter=status:up) for monitoring",
+            lambda c, _: preferred_gateway_candidates(c),
+            visible=False,
+        ),
+        SmokeTarget(
             "gateways.get",
             "gateways.get(id)",
             lambda c, seed: c.gateways.get(seed),
@@ -535,7 +542,7 @@ def build_targets(
             "v1.monitoring.get_device_flows_totals",
             "v1.monitoring.get_device_flows_totals(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_device_flows_totals(seed),
-            seed_from="gateways.list",
+            seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
             try_multiple_seeds=True,
@@ -544,7 +551,7 @@ def build_targets(
             "v1.monitoring.get_devices_totals",
             "v1.monitoring.get_devices_totals(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_devices_totals(seed),
-            seed_from="gateways.list",
+            seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
             try_multiple_seeds=True,
@@ -553,28 +560,28 @@ def build_targets(
             "v1.monitoring.get_interfaces_latest",
             "v1.monitoring.get_interfaces_latest(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_interfaces_latest(seed),
-            seed_from="gateways.list",
+            seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_first_id,
         ),
         SmokeTarget(
             "v1.monitoring.get_paths_latest",
             "v1.monitoring.get_paths_latest(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_paths_latest(seed),
-            seed_from="gateways.list",
+            seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_first_id,
         ),
         SmokeTarget(
             "v1.monitoring.get_routes_latest",
             "v1.monitoring.get_routes_latest(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_routes_latest(seed),
-            seed_from="gateways.list",
+            seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_first_id,
         ),
         SmokeTarget(
             "v1.monitoring.get_system_load",
             "v1.monitoring.get_system_load(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_system_load(seed),
-            seed_from="gateways.list",
+            seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
             try_multiple_seeds=True,
@@ -583,7 +590,7 @@ def build_targets(
             "v1.monitoring.get_system_lte",
             "v1.monitoring.get_system_lte(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_system_lte(seed),
-            seed_from="gateways.list",
+            seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
             try_multiple_seeds=True,
@@ -592,7 +599,7 @@ def build_targets(
             "v1.monitoring.get_system_memory",
             "v1.monitoring.get_system_memory(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_system_memory(seed),
-            seed_from="gateways.list",
+            seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
             try_multiple_seeds=True,
@@ -601,7 +608,7 @@ def build_targets(
             "v1.monitoring.get_system_uptime",
             "v1.monitoring.get_system_uptime(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_system_uptime(seed),
-            seed_from="gateways.list",
+            seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
             try_multiple_seeds=True,
@@ -610,7 +617,7 @@ def build_targets(
             "v1.monitoring.get_system_wifi",
             "v1.monitoring.get_system_wifi(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_system_wifi(seed),
-            seed_from="gateways.list",
+            seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
             try_multiple_seeds=True,
@@ -619,7 +626,7 @@ def build_targets(
             "v1.monitoring.get_paths_links",
             "v1.monitoring.get_paths_links(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_paths_links(seed),
-            seed_from="gateways.list",
+            seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
             try_multiple_seeds=True,
@@ -628,7 +635,7 @@ def build_targets(
             "v1.monitoring.get_paths_links_totals",
             "v1.monitoring.get_paths_links_totals(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_paths_links_totals(seed),
-            seed_from="gateways.list",
+            seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
             try_multiple_seeds=True,
@@ -744,6 +751,13 @@ def run_target(
     return result
 
 
+def preferred_gateway_candidates(client: SDWANClient) -> Any:
+    up_gateways = client.gateways.list(filter="status:up")
+    if up_gateways:
+        return up_gateways
+    return client.gateways.list()
+
+
 def execute_target_call(
     client: SDWANClient,
     target: SmokeTarget,
@@ -843,12 +857,27 @@ def main() -> None:
     results: dict[str, SmokeResult] = {}
 
     for target in targets:
+        if not target.visible:
+            continue
         result = run_target(client, target, registry, results)
         print_result(target.label, result)
 
-    passed = sum(1 for result in results.values() if result.status == "PASS")
-    skipped = sum(1 for result in results.values() if result.status == "SKIP")
-    failed = sum(1 for result in results.values() if result.status == "FAIL")
+    visible_target_names = {target.name for target in targets if target.visible}
+    passed = sum(
+        1
+        for name, result in results.items()
+        if name in visible_target_names and result.status == "PASS"
+    )
+    skipped = sum(
+        1
+        for name, result in results.items()
+        if name in visible_target_names and result.status == "SKIP"
+    )
+    failed = sum(
+        1
+        for name, result in results.items()
+        if name in visible_target_names and result.status == "FAIL"
+    )
 
     print()
     print("Totals")
