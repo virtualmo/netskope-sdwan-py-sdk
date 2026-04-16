@@ -19,6 +19,7 @@ class SmokeTarget:
     seed_extractor: Any | None = None
     skip_if: Any | None = None
     exception_classifier: Any | None = None
+    try_multiple_seeds: bool = False
 
 
 @dataclass
@@ -535,16 +536,18 @@ def build_targets(
             "v1.monitoring.get_device_flows_totals(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_device_flows_totals(seed),
             seed_from="gateways.list",
-            seed_extractor=extract_first_id,
+            seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
+            try_multiple_seeds=True,
         ),
         SmokeTarget(
             "v1.monitoring.get_devices_totals",
             "v1.monitoring.get_devices_totals(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_devices_totals(seed),
             seed_from="gateways.list",
-            seed_extractor=extract_first_id,
+            seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
+            try_multiple_seeds=True,
         ),
         SmokeTarget(
             "v1.monitoring.get_interfaces_latest",
@@ -572,56 +575,63 @@ def build_targets(
             "v1.monitoring.get_system_load(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_system_load(seed),
             seed_from="gateways.list",
-            seed_extractor=extract_first_id,
+            seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
+            try_multiple_seeds=True,
         ),
         SmokeTarget(
             "v1.monitoring.get_system_lte",
             "v1.monitoring.get_system_lte(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_system_lte(seed),
             seed_from="gateways.list",
-            seed_extractor=extract_first_id,
+            seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
+            try_multiple_seeds=True,
         ),
         SmokeTarget(
             "v1.monitoring.get_system_memory",
             "v1.monitoring.get_system_memory(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_system_memory(seed),
             seed_from="gateways.list",
-            seed_extractor=extract_first_id,
+            seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
+            try_multiple_seeds=True,
         ),
         SmokeTarget(
             "v1.monitoring.get_system_uptime",
             "v1.monitoring.get_system_uptime(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_system_uptime(seed),
             seed_from="gateways.list",
-            seed_extractor=extract_first_id,
+            seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
+            try_multiple_seeds=True,
         ),
         SmokeTarget(
             "v1.monitoring.get_system_wifi",
             "v1.monitoring.get_system_wifi(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_system_wifi(seed),
             seed_from="gateways.list",
-            seed_extractor=extract_first_id,
+            seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
+            try_multiple_seeds=True,
         ),
         SmokeTarget(
             "v1.monitoring.get_paths_links",
             "v1.monitoring.get_paths_links(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_paths_links(seed),
             seed_from="gateways.list",
-            seed_extractor=extract_first_id,
+            seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
+            try_multiple_seeds=True,
         ),
         SmokeTarget(
             "v1.monitoring.get_paths_links_totals",
             "v1.monitoring.get_paths_links_totals(gateway_id)",
             lambda c, seed: c.v1.monitoring.get_paths_links_totals(seed),
             seed_from="gateways.list",
-            seed_extractor=extract_first_id,
+            seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
+            try_multiple_seeds=True,
         ),
         SmokeTarget(
             "v1.users.get_groups",
@@ -652,6 +662,29 @@ def build_named_seed(
 
 
 DEPENDENCY_VALUES: dict[str, Any] = {}
+DEFAULT_GATEWAY_CANDIDATE_LIMIT = 3
+
+
+def extract_gateway_candidate_ids(
+    value: Any,
+    *,
+    limit: int = DEFAULT_GATEWAY_CANDIDATE_LIMIT,
+) -> list[str]:
+    if not isinstance(value, list):
+        return []
+
+    candidates: list[str] = []
+    for item in value:
+        item_id = getattr(item, "id", None)
+        if not isinstance(item_id, str):
+            continue
+        gateway_id = item_id.strip()
+        if not gateway_id or gateway_id in candidates:
+            continue
+        candidates.append(gateway_id)
+        if len(candidates) >= limit:
+            break
+    return candidates
 
 
 def run_target(
@@ -702,25 +735,62 @@ def run_target(
             results[target.name] = result
             return result
 
+    if target.try_multiple_seeds:
+        result = run_target_with_multiple_seeds(client, target, seed)
+    else:
+        result = execute_target_call(client, target, seed)
+
+    results[target.name] = result
+    return result
+
+
+def execute_target_call(
+    client: SDWANClient,
+    target: SmokeTarget,
+    seed: Any,
+) -> SmokeResult:
     try:
         value = target.call(client, seed)
     except PermissionDeniedError as exc:
-        result = SmokeResult("SKIP", short_error(exc), attempted=True)
+        return SmokeResult("SKIP", short_error(exc), attempted=True)
     except Exception as exc:
         if target.exception_classifier is not None:
             classified = target.exception_classifier(exc)
             if classified is not None:
-                result = classified
-            else:
-                result = SmokeResult("FAIL", short_error(exc), attempted=True)
-        else:
-            result = SmokeResult("FAIL", short_error(exc), attempted=True)
-    else:
-        DEPENDENCY_VALUES[target.name] = value
-        result = SmokeResult("PASS", summarize(value), attempted=True, value=value)
+                return classified
+        return SmokeResult("FAIL", short_error(exc), attempted=True)
 
-    results[target.name] = result
-    return result
+    DEPENDENCY_VALUES[target.name] = value
+    return SmokeResult("PASS", summarize(value), attempted=True, value=value)
+
+
+def run_target_with_multiple_seeds(
+    client: SDWANClient,
+    target: SmokeTarget,
+    seeds: Any,
+) -> SmokeResult:
+    if not isinstance(seeds, list) or not seeds:
+        return SmokeResult("SKIP", "no gateway candidates available", attempted=False)
+
+    skip_reason: str | None = None
+    attempted_candidates = 0
+
+    for seed in seeds:
+        attempted_candidates += 1
+        result = execute_target_call(client, target, seed)
+        if result.status == "PASS":
+            return result
+        if result.status == "FAIL":
+            return result
+        skip_reason = result.reason
+
+    if skip_reason is None:
+        skip_reason = "unsupported for this tenant/gateway/feature set"
+    return SmokeResult(
+        "SKIP",
+        f"{skip_reason} after {attempted_candidates} gateway candidates",
+        attempted=True,
+    )
 
 
 def print_connection(client: SDWANClient) -> None:
