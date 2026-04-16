@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from netskopesdwan import SDWANClient
+from netskopesdwan import SDWANClient, __version__
 from netskopesdwan.exceptions import ConfigurationError
 from netskopesdwan.managers.gateways import GatewayManager
 
@@ -147,3 +147,7 @@ def test_client_requires_token() -> None:
         assert "api_token is required" in str(exc)
     else:
         raise AssertionError("Expected ConfigurationError to be raised.")
+
+
+def test_package_exposes_version() -> None:
+    assert __version__ == "0.1.0"
