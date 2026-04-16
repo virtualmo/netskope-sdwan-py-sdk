@@ -1,7 +1,7 @@
 site_name: netskope-sdwan-py-sdk
 site_description: Read-only Python SDK for Netskope SD-WAN APIs
-repo_url: https://github.com/ns-melamin/netskope-sdwan-py-sdk
-repo_name: ns-melamin/netskope-sdwan-py-sdk
+repo_url: https://github.com/virtualmo/netskope-sdwan-py-sdk
+repo_name: virtualmo/netskope-sdwan-py-sdk
 theme:
   name: material
 nav:
