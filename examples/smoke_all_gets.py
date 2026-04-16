@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -10,58 +10,27 @@ from netskopesdwan.exceptions import PermissionDeniedError
 from netskopesdwan.models import DownloadResult
 
 
+@dataclass(frozen=True)
+class SmokeTarget:
+    name: str
+    label: str
+    call: Any
+    seed_from: str | None = None
+    seed_extractor: Any | None = None
+    skip_if: Any | None = None
+
+
+@dataclass
+class SmokeResult:
+    status: str
+    reason: str
+    attempted: bool
+    value: Any = None
+
+
 def env(name: str, default: str | None = None) -> str | None:
     value = os.getenv(name, default)
     return value.strip() if isinstance(value, str) else value
-
-
-def print_header(title: str) -> None:
-    print(f"\n{'=' * 80}")
-    print(title)
-    print(f"{'=' * 80}")
-
-
-def summarize(value: Any) -> str:
-    if value is None:
-        return "None"
-
-    if isinstance(value, list):
-        first = value[0] if value else None
-        if hasattr(first, "id"):
-            return (
-                "list("
-                f"len={len(value)}, "
-                f"first_id={getattr(first, 'id', None)!r}, "
-                f"first_name={getattr(first, 'name', None)!r})"
-            )
-        return f"list(len={len(value)})"
-
-    if hasattr(value, "id"):
-        return (
-            f"{value.__class__.__name__}("
-            f"id={getattr(value, 'id', None)!r}, "
-            f"name={getattr(value, 'name', None)!r})"
-        )
-
-    if isinstance(value, dict):
-        keys = list(value.keys())[:10]
-        return f"dict(keys={keys})"
-
-    if isinstance(value, DownloadResult):
-        return (
-            f"DownloadResult(size={len(value.content)} bytes, "
-            f"content_type={value.content_type!r}, "
-            f"filename={value.filename!r})"
-        )
-
-    if isinstance(value, str):
-        short = value[:120].replace("\n", "\\n")
-        return f"str(len={len(value)}, preview={short!r})"
-
-    if isinstance(value, bytes):
-        return f"bytes(len={len(value)})"
-
-    return repr(value)
 
 
 def default_audit_range() -> tuple[str, str]:
@@ -74,37 +43,657 @@ def to_iso8601_z(value: datetime) -> str:
     return value.replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def safe_call(
-    results: dict[str, list[str]],
-    label: str,
-    func: Callable[[], Any],
-) -> Any | None:
-    try:
-        result = func()
-    except PermissionDeniedError as exc:
-        print(f"[PERM] {label}: {exc}")
-        results["permission"].append(label)
+def summarize(value: Any) -> str:
+    if value is None:
+        return "ok"
+
+    if isinstance(value, list):
+        first = value[0] if value else None
+        if hasattr(first, "id"):
+            return (
+                "ok "
+                f"list(len={len(value)}, "
+                f"first_id={getattr(first, 'id', None)!r}, "
+                f"first_name={getattr(first, 'name', None)!r})"
+            )
+        if isinstance(first, dict):
+            keys = list(first.keys())[:4]
+            return f"ok list(len={len(value)}, first_keys={keys})"
+        return f"ok list(len={len(value)})"
+
+    if hasattr(value, "id"):
+        return (
+            f"ok {value.__class__.__name__}("
+            f"id={getattr(value, 'id', None)!r}, "
+            f"name={getattr(value, 'name', None)!r})"
+        )
+
+    if isinstance(value, DownloadResult):
+        return (
+            f"ok DownloadResult("
+            f"size={len(value.content)} bytes, "
+            f"content_type={value.content_type!r}, "
+            f"filename={value.filename!r})"
+        )
+
+    if isinstance(value, dict):
+        keys = list(value.keys())[:6]
+        return f"ok dict(keys={keys})"
+
+    if isinstance(value, str):
+        preview = value[:80].replace("\n", "\\n")
+        return f"ok str(len={len(value)}, preview={preview!r})"
+
+    return f"ok {value!r}"
+
+
+def short_error(exc: Exception) -> str:
+    text = str(exc).strip() or exc.__class__.__name__
+    text = text.replace("\n", " ")
+    if len(text) > 140:
+        return f"{exc.__class__.__name__}: {text[:137]}..."
+    return f"{exc.__class__.__name__}: {text}"
+
+
+def first_item(value: Any) -> Any | None:
+    if isinstance(value, list) and value:
+        return value[0]
+    return None
+
+
+def extract_first_id(value: Any) -> str | None:
+    item = first_item(value)
+    if item is None:
         return None
-    except Exception as exc:
-        print(f"[FAIL] {label}: {exc.__class__.__name__}: {exc}")
-        results["failure"].append(label)
+    item_id = getattr(item, "id", None)
+    if isinstance(item_id, str) and item_id.strip():
+        return item_id.strip()
+    if isinstance(item, dict):
+        raw_id = item.get("id")
+        if raw_id is None:
+            return None
+        text = str(raw_id).strip()
+        return text or None
+    return None
+
+
+def extract_first_name(value: Any) -> str | None:
+    item = first_item(value)
+    if not isinstance(item, dict):
+        return None
+    raw_name = item.get("name")
+    if raw_name is None:
+        return None
+    text = str(raw_name).strip()
+    return text or None
+
+
+def require_site_command_output_name() -> str | None:
+    if env("NETSKOPESDWAN_SITE_COMMAND_OUTPUT_NAME"):
+        return None
+    return "set NETSKOPESDWAN_SITE_COMMAND_OUTPUT_NAME to smoke get_output(...)"
+
+
+def build_targets(
+    *,
+    audit_from: str,
+    audit_to: str,
+    site_command_output_name: str | None,
+) -> list[SmokeTarget]:
+    # Add new GET endpoints here. Seeded targets reuse prior list results through the cache.
+    return [
+        SmokeTarget(
+            "address_groups.list",
+            "address_groups.list()",
+            lambda c, _: c.address_groups.list(),
+        ),
+        SmokeTarget(
+            "address_groups.get",
+            "address_groups.get(id)",
+            lambda c, seed: c.address_groups.get(seed),
+            seed_from="address_groups.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "address_groups.list_address_objects",
+            "address_groups.list_address_objects(group_id)",
+            lambda c, seed: c.address_groups.list_address_objects(seed),
+            seed_from="address_groups.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "audit_events.list",
+            "audit_events.list(...)",
+            lambda c, _: c.audit_events.list(
+                created_at_from=audit_from,
+                created_at_to=audit_to,
+            ),
+        ),
+        SmokeTarget(
+            "applications.list_categories",
+            "applications.list_categories()",
+            lambda c, _: c.applications.list_categories(),
+        ),
+        SmokeTarget(
+            "applications.list_custom_apps",
+            "applications.list_custom_apps()",
+            lambda c, _: c.applications.list_custom_apps(),
+        ),
+        SmokeTarget(
+            "applications.get_custom_app",
+            "applications.get_custom_app(id)",
+            lambda c, seed: c.applications.get_custom_app(seed),
+            seed_from="applications.list_custom_apps",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "applications.list_qosmos_apps",
+            "applications.list_qosmos_apps()",
+            lambda c, _: c.applications.list_qosmos_apps(),
+        ),
+        SmokeTarget(
+            "applications.list_webroot_categories",
+            "applications.list_webroot_categories()",
+            lambda c, _: c.applications.list_webroot_categories(),
+        ),
+        SmokeTarget(
+            "ca_certificates.list",
+            "ca_certificates.list()",
+            lambda c, _: c.ca_certificates.list(),
+        ),
+        SmokeTarget(
+            "ca_certificates.get",
+            "ca_certificates.get(id)",
+            lambda c, seed: c.ca_certificates.get(seed),
+            seed_from="ca_certificates.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "client_templates.list",
+            "client_templates.list()",
+            lambda c, _: c.client_templates.list(),
+        ),
+        SmokeTarget(
+            "client_templates.get",
+            "client_templates.get(id)",
+            lambda c, seed: c.client_templates.get(seed),
+            seed_from="client_templates.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget("clients.list", "clients.list()", lambda c, _: c.clients.list()),
+        SmokeTarget(
+            "clients.get",
+            "clients.get(id)",
+            lambda c, seed: c.clients.get(seed),
+            seed_from="clients.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "cloud_accounts.list",
+            "cloud_accounts.list()",
+            lambda c, _: c.cloud_accounts.list(),
+        ),
+        SmokeTarget(
+            "cloud_accounts.get",
+            "cloud_accounts.get(id)",
+            lambda c, seed: c.cloud_accounts.get(seed),
+            seed_from="cloud_accounts.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "controller_operators.list",
+            "controller_operators.list()",
+            lambda c, _: c.controller_operators.list(),
+        ),
+        SmokeTarget(
+            "controller_operators.get",
+            "controller_operators.get(id)",
+            lambda c, seed: c.controller_operators.get(seed),
+            seed_from="controller_operators.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "controllers.list",
+            "controllers.list()",
+            lambda c, _: c.controllers.list(),
+        ),
+        SmokeTarget(
+            "controllers.get",
+            "controllers.get(id)",
+            lambda c, seed: c.controllers.get(seed),
+            seed_from="controllers.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "controllers.get_operator_status",
+            "controllers.get_operator_status(id)",
+            lambda c, seed: c.controllers.get_operator_status(seed),
+            seed_from="controllers.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "device_groups.list",
+            "device_groups.list()",
+            lambda c, _: c.device_groups.list(),
+        ),
+        SmokeTarget(
+            "device_groups.get",
+            "device_groups.get(id)",
+            lambda c, seed: c.device_groups.get(seed),
+            seed_from="device_groups.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "gateway_groups.list",
+            "gateway_groups.list()",
+            lambda c, _: c.gateway_groups.list(),
+        ),
+        SmokeTarget(
+            "gateway_groups.get",
+            "gateway_groups.get(id)",
+            lambda c, seed: c.gateway_groups.get(seed),
+            seed_from="gateway_groups.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget("gateways.list", "gateways.list()", lambda c, _: c.gateways.list()),
+        SmokeTarget(
+            "gateways.get",
+            "gateways.get(id)",
+            lambda c, seed: c.gateways.get(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "gateways.get_localui_password",
+            "gateways.get_localui_password(id)",
+            lambda c, seed: c.gateways.get_localui_password(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "gateways.get_ssh_password",
+            "gateways.get_ssh_password(id)",
+            lambda c, seed: c.gateways.get_ssh_password(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "gateway_templates.list",
+            "gateway_templates.list()",
+            lambda c, _: c.gateway_templates.list(),
+        ),
+        SmokeTarget(
+            "gateway_templates.get",
+            "gateway_templates.get(id)",
+            lambda c, seed: c.gateway_templates.get(seed),
+            seed_from="gateway_templates.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "inventory_devices.list",
+            "inventory_devices.list()",
+            lambda c, _: c.inventory_devices.list(),
+        ),
+        SmokeTarget("jwks.get", "jwks.get()", lambda c, _: c.jwks.get()),
+        SmokeTarget(
+            "ntp_configs.list",
+            "ntp_configs.list()",
+            lambda c, _: c.ntp_configs.list(),
+        ),
+        SmokeTarget(
+            "ntp_configs.get",
+            "ntp_configs.get(id)",
+            lambda c, seed: c.ntp_configs.get(seed),
+            seed_from="ntp_configs.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "overlay_tags.list",
+            "overlay_tags.list()",
+            lambda c, _: c.overlay_tags.list(),
+        ),
+        SmokeTarget(
+            "overlay_tags.get",
+            "overlay_tags.get(id)",
+            lambda c, seed: c.overlay_tags.get(seed),
+            seed_from="overlay_tags.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget("policies.list", "policies.list()", lambda c, _: c.policies.list()),
+        SmokeTarget(
+            "policies.get",
+            "policies.get(id)",
+            lambda c, seed: c.policies.get(seed),
+            seed_from="policies.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "radius_servers.list",
+            "radius_servers.list()",
+            lambda c, _: c.radius_servers.list(),
+        ),
+        SmokeTarget(
+            "radius_servers.get",
+            "radius_servers.get(id)",
+            lambda c, seed: c.radius_servers.get(seed),
+            seed_from="radius_servers.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget("segments.list", "segments.list()", lambda c, _: c.segments.list()),
+        SmokeTarget(
+            "segments.get",
+            "segments.get(id)",
+            lambda c, seed: c.segments.get(seed),
+            seed_from="segments.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "site_commands.list",
+            "site_commands.list()",
+            lambda c, _: c.site_commands.list(),
+        ),
+        SmokeTarget(
+            "site_commands.get",
+            "site_commands.get(id)",
+            lambda c, seed: c.site_commands.get(seed),
+            seed_from="site_commands.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "site_commands.get_output",
+            "site_commands.get_output(id, name)",
+            lambda c, seed: c.site_commands.get_output(seed, site_command_output_name),
+            seed_from="site_commands.list",
+            seed_extractor=extract_first_id,
+            skip_if=require_site_command_output_name,
+        ),
+        SmokeTarget(
+            "software.list_versions",
+            "software.list_versions()",
+            lambda c, _: c.software.list_versions(),
+        ),
+        SmokeTarget(
+            "software.list_downloads",
+            "software.list_downloads()",
+            lambda c, _: c.software.list_downloads(),
+        ),
+        SmokeTarget("tenants.list", "tenants.list()", lambda c, _: c.tenants.list()),
+        SmokeTarget(
+            "tenants.get",
+            "tenants.get(id)",
+            lambda c, seed: c.tenants.get(seed),
+            seed_from="tenants.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "user_groups.list",
+            "user_groups.list()",
+            lambda c, _: c.user_groups.list(),
+        ),
+        SmokeTarget(
+            "user_groups.get",
+            "user_groups.get(id)",
+            lambda c, seed: c.user_groups.get(seed),
+            seed_from="user_groups.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget("users.list", "users.list()", lambda c, _: c.users.list()),
+        SmokeTarget(
+            "users.get",
+            "users.get(id)",
+            lambda c, seed: c.users.get(seed),
+            seed_from="users.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "vpn_peers.list",
+            "vpn_peers.list()",
+            lambda c, _: c.vpn_peers.list(),
+        ),
+        SmokeTarget(
+            "vpn_peers.get",
+            "vpn_peers.get(id)",
+            lambda c, seed: c.vpn_peers.get(seed),
+            seed_from="vpn_peers.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.edges.list",
+            "v1.edges.list()",
+            lambda c, _: c.v1.edges.list(),
+        ),
+        SmokeTarget(
+            "v1.edges.get",
+            "v1.edges.get(id)",
+            lambda c, seed: c.v1.edges.get(seed),
+            seed_from="v1.edges.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.edges.list_interfaces",
+            "v1.edges.list_interfaces(edge_id)",
+            lambda c, seed: c.v1.edges.list_interfaces(seed),
+            seed_from="v1.edges.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.edges.get_interface",
+            "v1.edges.get_interface(edge_id, interface_name)",
+            lambda c, seed: c.v1.edges.get_interface(seed["edge_id"], seed["interface_name"]),
+            seed_from="v1.edges.list_interfaces",
+            seed_extractor=lambda value: build_named_seed(
+                value,
+                source_target="v1.edges.list_interfaces",
+                upstream_id_target="v1.edges.list",
+            ),
+        ),
+        SmokeTarget(
+            "v1.edges.list_gateway_interfaces",
+            "v1.edges.list_gateway_interfaces(edge_id)",
+            lambda c, seed: c.v1.edges.list_gateway_interfaces(seed),
+            seed_from="v1.edges.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.edges.get_gateway_interface",
+            "v1.edges.get_gateway_interface(edge_id, interface_name)",
+            lambda c, seed: c.v1.edges.get_gateway_interface(
+                seed["edge_id"],
+                seed["interface_name"],
+            ),
+            seed_from="v1.edges.list_gateway_interfaces",
+            seed_extractor=lambda value: build_named_seed(
+                value,
+                source_target="v1.edges.list_gateway_interfaces",
+                upstream_id_target="v1.edges.list",
+            ),
+        ),
+        SmokeTarget(
+            "v1.monitoring.get_device_flows_totals",
+            "v1.monitoring.get_device_flows_totals(gateway_id)",
+            lambda c, seed: c.v1.monitoring.get_device_flows_totals(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.monitoring.get_devices_totals",
+            "v1.monitoring.get_devices_totals(gateway_id)",
+            lambda c, seed: c.v1.monitoring.get_devices_totals(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.monitoring.get_interfaces_latest",
+            "v1.monitoring.get_interfaces_latest(gateway_id)",
+            lambda c, seed: c.v1.monitoring.get_interfaces_latest(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.monitoring.get_paths_latest",
+            "v1.monitoring.get_paths_latest(gateway_id)",
+            lambda c, seed: c.v1.monitoring.get_paths_latest(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.monitoring.get_routes_latest",
+            "v1.monitoring.get_routes_latest(gateway_id)",
+            lambda c, seed: c.v1.monitoring.get_routes_latest(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.monitoring.get_system_load",
+            "v1.monitoring.get_system_load(gateway_id)",
+            lambda c, seed: c.v1.monitoring.get_system_load(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.monitoring.get_system_lte",
+            "v1.monitoring.get_system_lte(gateway_id)",
+            lambda c, seed: c.v1.monitoring.get_system_lte(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.monitoring.get_system_memory",
+            "v1.monitoring.get_system_memory(gateway_id)",
+            lambda c, seed: c.v1.monitoring.get_system_memory(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.monitoring.get_system_uptime",
+            "v1.monitoring.get_system_uptime(gateway_id)",
+            lambda c, seed: c.v1.monitoring.get_system_uptime(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.monitoring.get_system_wifi",
+            "v1.monitoring.get_system_wifi(gateway_id)",
+            lambda c, seed: c.v1.monitoring.get_system_wifi(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.monitoring.get_paths_links",
+            "v1.monitoring.get_paths_links(gateway_id)",
+            lambda c, seed: c.v1.monitoring.get_paths_links(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.monitoring.get_paths_links_totals",
+            "v1.monitoring.get_paths_links_totals(gateway_id)",
+            lambda c, seed: c.v1.monitoring.get_paths_links_totals(seed),
+            seed_from="gateways.list",
+            seed_extractor=extract_first_id,
+        ),
+        SmokeTarget(
+            "v1.users.get_groups",
+            "v1.users.get_groups(user_id)",
+            lambda c, seed: c.v1.users.get_groups(seed),
+            seed_from="users.list",
+            seed_extractor=extract_first_id,
+        ),
+    ]
+
+
+def build_named_seed(
+    value: Any,
+    *,
+    source_target: str,
+    upstream_id_target: str,
+) -> dict[str, str] | None:
+    interface_name = extract_first_name(value)
+    if not interface_name:
         return None
 
-    print(f"[OK]   {label}: {summarize(result)}")
-    results["success"].append(label)
+    upstream_value = DEPENDENCY_VALUES.get(upstream_id_target)
+    edge_id = extract_first_id(upstream_value)
+    if not edge_id:
+        return None
+
+    return {"edge_id": edge_id, "interface_name": interface_name}
+
+
+DEPENDENCY_VALUES: dict[str, Any] = {}
+
+
+def run_target(
+    client: SDWANClient,
+    target: SmokeTarget,
+    registry: dict[str, SmokeTarget],
+    results: dict[str, SmokeResult],
+) -> SmokeResult:
+    cached = results.get(target.name)
+    if cached is not None:
+        return cached
+
+    if target.skip_if is not None:
+        skip_reason = target.skip_if()
+        if skip_reason:
+            result = SmokeResult("SKIP", skip_reason, attempted=False)
+            results[target.name] = result
+            return result
+
+    seed = None
+    if target.seed_from is not None:
+        dependency = run_target(client, registry[target.seed_from], registry, results)
+        if dependency.status == "FAIL":
+            result = SmokeResult(
+                "SKIP",
+                f"dependency failed: {registry[target.seed_from].label}",
+                attempted=False,
+            )
+            results[target.name] = result
+            return result
+        if dependency.status == "SKIP":
+            result = SmokeResult(
+                "SKIP",
+                f"dependency unavailable: {registry[target.seed_from].label}",
+                attempted=False,
+            )
+            results[target.name] = result
+            return result
+
+        extractor = target.seed_extractor or extract_first_id
+        seed = extractor(dependency.value)
+        if seed is None:
+            result = SmokeResult(
+                "SKIP",
+                f"no seed available from {registry[target.seed_from].label}",
+                attempted=False,
+            )
+            results[target.name] = result
+            return result
+
+    try:
+        value = target.call(client, seed)
+    except PermissionDeniedError as exc:
+        result = SmokeResult("SKIP", short_error(exc), attempted=True)
+    except Exception as exc:
+        result = SmokeResult("FAIL", short_error(exc), attempted=True)
+    else:
+        DEPENDENCY_VALUES[target.name] = value
+        result = SmokeResult("PASS", summarize(value), attempted=True, value=value)
+
+    results[target.name] = result
     return result
 
 
-def skip(results: dict[str, list[str]], label: str, reason: str) -> None:
-    print(f"[SKIP] {label}: {reason}")
-    results["skip"].append(label)
+def print_connection(client: SDWANClient) -> None:
+    print("Connection")
+    print(f"  base_url: {client.resolved_base_url}")
+    print(f"  metadata: {client.resolution_metadata}")
+    print()
 
 
-def first_id(records: Any) -> str | None:
-    if not isinstance(records, list) or not records:
-        return None
-    first = records[0]
-    return getattr(first, "id", None)
+def print_result(label: str, result: SmokeResult) -> None:
+    print(f"{result.status:<5} {label:<48} {result.reason}")
 
 
 def main() -> None:
@@ -112,13 +701,18 @@ def main() -> None:
     tenant_url = env("NETSKOPESDWAN_TENANT_URL")
     api_token = env("NETSKOPESDWAN_API_TOKEN")
     sdwan_tenant_name = env("NETSKOPESDWAN_SDWAN_TENANT_NAME")
-    results = {"success": [], "permission": [], "failure": [], "skip": []}
+    site_command_output_name = env("NETSKOPESDWAN_SITE_COMMAND_OUTPUT_NAME")
 
     if not api_token:
         raise SystemExit("Missing NETSKOPESDWAN_API_TOKEN")
 
     if not base_url and not tenant_url:
         raise SystemExit("Set NETSKOPESDWAN_BASE_URL or NETSKOPESDWAN_TENANT_URL")
+
+    audit_from = env("NETSKOPESDWAN_AUDIT_FROM")
+    audit_to = env("NETSKOPESDWAN_AUDIT_TO")
+    if not audit_from or not audit_to:
+        audit_from, audit_to = default_audit_range()
 
     client = SDWANClient(
         base_url=base_url,
@@ -127,292 +721,34 @@ def main() -> None:
         api_token=api_token,
     )
 
-    print_header("Connection")
-    print("Resolved base URL:", client.resolved_base_url)
-    print("Resolution metadata:", client.resolution_metadata)
+    print_connection(client)
+    print(f"Audit window: {audit_from} -> {audit_to}")
+    print()
 
-    print_header("Infrastructure / Policy / Network")
-
-    device_groups = safe_call(
-        results,
-        "device_groups.list()",
-        lambda: client.device_groups.list(),
+    DEPENDENCY_VALUES.clear()
+    targets = build_targets(
+        audit_from=audit_from,
+        audit_to=audit_to,
+        site_command_output_name=site_command_output_name,
     )
-    if group_id := first_id(device_groups):
-        safe_call(
-            results,
-            f"device_groups.get({group_id})",
-            lambda: client.device_groups.get(group_id),
-        )
+    registry = {target.name: target for target in targets}
+    results: dict[str, SmokeResult] = {}
 
-    gateway_groups = safe_call(
-        results,
-        "gateway_groups.list()",
-        lambda: client.gateway_groups.list(),
-    )
-    if group_id := first_id(gateway_groups):
-        safe_call(
-            results,
-            f"gateway_groups.get({group_id})",
-            lambda: client.gateway_groups.get(group_id),
-        )
+    for target in targets:
+        result = run_target(client, target, registry, results)
+        print_result(target.label, result)
 
-    gateway_templates = safe_call(
-        results,
-        "gateway_templates.list()",
-        lambda: client.gateway_templates.list(),
-    )
-    if template_id := first_id(gateway_templates):
-        safe_call(
-            results,
-            f"gateway_templates.get({template_id})",
-            lambda: client.gateway_templates.get(template_id),
-        )
+    passed = sum(1 for result in results.values() if result.status == "PASS")
+    skipped = sum(1 for result in results.values() if result.status == "SKIP")
+    failed = sum(1 for result in results.values() if result.status == "FAIL")
 
-    safe_call(results, "inventory_devices.list()", lambda: client.inventory_devices.list())
+    print()
+    print("Totals")
+    print(f"  passed:  {passed}")
+    print(f"  skipped: {skipped}")
+    print(f"  failed:  {failed}")
 
-    ntp_configs = safe_call(results, "ntp_configs.list()", lambda: client.ntp_configs.list())
-    if ntp_id := first_id(ntp_configs):
-        safe_call(results, f"ntp_configs.get({ntp_id})", lambda: client.ntp_configs.get(ntp_id))
-
-    overlay_tags = safe_call(results, "overlay_tags.list()", lambda: client.overlay_tags.list())
-    if tag_id := first_id(overlay_tags):
-        safe_call(results, f"overlay_tags.get({tag_id})", lambda: client.overlay_tags.get(tag_id))
-
-    segments = safe_call(results, "segments.list()", lambda: client.segments.list())
-    if segment_id := first_id(segments):
-        safe_call(results, f"segments.get({segment_id})", lambda: client.segments.get(segment_id))
-
-    vpn_peers = safe_call(results, "vpn_peers.list()", lambda: client.vpn_peers.list())
-    if peer_id := first_id(vpn_peers):
-        safe_call(results, f"vpn_peers.get({peer_id})", lambda: client.vpn_peers.get(peer_id))
-
-    policies = safe_call(results, "policies.list()", lambda: client.policies.list())
-    if policy_id := first_id(policies):
-        safe_call(results, f"policies.get({policy_id})", lambda: client.policies.get(policy_id))
-
-    radius_servers = safe_call(
-        results,
-        "radius_servers.list()",
-        lambda: client.radius_servers.list(),
-    )
-    if radius_id := first_id(radius_servers):
-        safe_call(
-            results,
-            f"radius_servers.get({radius_id})",
-            lambda: client.radius_servers.get(radius_id),
-        )
-
-    print_header("Gateways")
-
-    gateways = safe_call(results, "gateways.list()", lambda: client.gateways.list())
-    if gateway_id := first_id(gateways):
-        safe_call(results, f"gateways.get({gateway_id})", lambda: client.gateways.get(gateway_id))
-        safe_call(
-            results,
-            f"gateways.get_localui_password({gateway_id})",
-            lambda: client.gateways.get_localui_password(gateway_id),
-        )
-        safe_call(
-            results,
-            f"gateways.get_ssh_password({gateway_id})",
-            lambda: client.gateways.get_ssh_password(gateway_id),
-        )
-
-    print_header("Clients / Tenants / Users / Cloud")
-
-    client_templates = safe_call(
-        results,
-        "client_templates.list()",
-        lambda: client.client_templates.list(),
-    )
-    if template_id := first_id(client_templates):
-        safe_call(
-            results,
-            f"client_templates.get({template_id})",
-            lambda: client.client_templates.get(template_id),
-        )
-
-    clients = safe_call(results, "clients.list()", lambda: client.clients.list())
-    if client_id := first_id(clients):
-        safe_call(results, f"clients.get({client_id})", lambda: client.clients.get(client_id))
-
-    cloud_accounts = safe_call(
-        results,
-        "cloud_accounts.list()",
-        lambda: client.cloud_accounts.list(),
-    )
-    if cloud_id := first_id(cloud_accounts):
-        safe_call(
-            results,
-            f"cloud_accounts.get({cloud_id})",
-            lambda: client.cloud_accounts.get(cloud_id),
-        )
-
-    tenants = safe_call(results, "tenants.list()", lambda: client.tenants.list())
-    if tenant_id := first_id(tenants):
-        safe_call(results, f"tenants.get({tenant_id})", lambda: client.tenants.get(tenant_id))
-
-    user_groups = safe_call(results, "user_groups.list()", lambda: client.user_groups.list())
-    if group_id := first_id(user_groups):
-        safe_call(results, f"user_groups.get({group_id})", lambda: client.user_groups.get(group_id))
-
-    users = safe_call(results, "users.list()", lambda: client.users.list())
-    if user_id := first_id(users):
-        safe_call(results, f"users.get({user_id})", lambda: client.users.get(user_id))
-
-    print_header("Audit / Controllers / Site Commands / Software")
-
-    audit_from = env("NETSKOPESDWAN_AUDIT_FROM")
-    audit_to = env("NETSKOPESDWAN_AUDIT_TO")
-    audit_type = env("NETSKOPESDWAN_AUDIT_TYPE")
-    audit_subtype = env("NETSKOPESDWAN_AUDIT_SUBTYPE")
-    audit_activity = env("NETSKOPESDWAN_AUDIT_ACTIVITY")
-    if not audit_from or not audit_to:
-        audit_from, audit_to = default_audit_range()
-        print(f"Using default audit window: {audit_from} -> {audit_to}")
-
-    safe_call(
-        results,
-        "audit_events.list(...)",
-        lambda: client.audit_events.list(
-            created_at_from=audit_from,
-            created_at_to=audit_to,
-            type=audit_type,
-            subtype=audit_subtype,
-            activity=audit_activity,
-        ),
-    )
-
-    controller_operators = safe_call(
-        results,
-        "controller_operators.list()",
-        lambda: client.controller_operators.list(),
-    )
-    if operator_id := first_id(controller_operators):
-        safe_call(
-            results,
-            f"controller_operators.get({operator_id})",
-            lambda: client.controller_operators.get(operator_id),
-        )
-
-    controllers = safe_call(
-        results,
-        "controllers.list()",
-        lambda: client.controllers.list(),
-    )
-    if controller_id := first_id(controllers):
-        safe_call(
-            results,
-            f"controllers.get({controller_id})",
-            lambda: client.controllers.get(controller_id),
-        )
-        safe_call(
-            results,
-            f"controllers.get_operator_status({controller_id})",
-            lambda: client.controllers.get_operator_status(controller_id),
-        )
-
-    site_commands = safe_call(
-        results,
-        "site_commands.list()",
-        lambda: client.site_commands.list(),
-    )
-    if command_id := first_id(site_commands):
-        safe_call(
-            results,
-            f"site_commands.get({command_id})",
-            lambda: client.site_commands.get(command_id),
-        )
-        output_name = env("NETSKOPESDWAN_SITE_COMMAND_OUTPUT_NAME")
-        if output_name:
-            safe_call(
-                results,
-                f"site_commands.get_output({command_id}, {output_name})",
-                lambda: client.site_commands.get_output(command_id, output_name),
-            )
-        else:
-            skip(
-                results,
-                "site_commands.get_output(...)",
-                "set NETSKOPESDWAN_SITE_COMMAND_OUTPUT_NAME",
-            )
-
-    safe_call(results, "software.list_versions()", lambda: client.software.list_versions())
-    safe_call(results, "software.list_downloads()", lambda: client.software.list_downloads())
-
-    print_header("Addressing / Applications / Certificates / Auth")
-
-    address_groups = safe_call(
-        results,
-        "address_groups.list()",
-        lambda: client.address_groups.list(),
-    )
-    if group_id := first_id(address_groups):
-        safe_call(
-            results,
-            f"address_groups.get({group_id})",
-            lambda: client.address_groups.get(group_id),
-        )
-        safe_call(
-            results,
-            f"address_groups.list_address_objects({group_id})",
-            lambda: client.address_groups.list_address_objects(group_id),
-        )
-
-    safe_call(
-        results,
-        "applications.list_categories()",
-        lambda: client.applications.list_categories(),
-    )
-
-    custom_apps = safe_call(
-        results,
-        "applications.list_custom_apps()",
-        lambda: client.applications.list_custom_apps(),
-    )
-    if app_id := first_id(custom_apps):
-        safe_call(
-            results,
-            f"applications.get_custom_app({app_id})",
-            lambda: client.applications.get_custom_app(app_id),
-        )
-
-    safe_call(
-        results,
-        "applications.list_qosmos_apps()",
-        lambda: client.applications.list_qosmos_apps(),
-    )
-    safe_call(
-        results,
-        "applications.list_webroot_categories()",
-        lambda: client.applications.list_webroot_categories(),
-    )
-
-    ca_certs = safe_call(
-        results,
-        "ca_certificates.list()",
-        lambda: client.ca_certificates.list(),
-    )
-    if cert_id := first_id(ca_certs):
-        safe_call(
-            results,
-            f"ca_certificates.get({cert_id})",
-            lambda: client.ca_certificates.get(cert_id),
-        )
-
-    safe_call(results, "jwks.get()", lambda: client.jwks.get())
-
-    print_header("Summary")
-    print(f"Successes:   {len(results['success'])}")
-    print(f"Permissions: {len(results['permission'])}")
-    print(f"Failures:    {len(results['failure'])}")
-    print(f"Skipped:     {len(results['skip'])}")
-
-    if results["permission"]:
-        print("Permission-limited calls:", ", ".join(results["permission"]))
-    if results["failure"]:
-        print("Failures:", ", ".join(results["failure"]))
+    raise SystemExit(1 if failed > 0 else 0)
 
 
 if __name__ == "__main__":
