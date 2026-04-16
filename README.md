@@ -1,7 +1,9 @@
 # netskope-sdwan-py-sdk
 
-> ⚠️ Unofficial SDK – community maintained
 `netskope-sdwan-py-sdk` is a read-only Python SDK for Netskope SD-WAN APIs.
+
+> ⚠️ Unofficial SDK – community maintained
+
 
 ## Design Principles
 
