@@ -1,0 +1,3266 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Read-only Python SDK for Netskope SD-WAN APIs">
+      
+      
+      
+      
+        <link rel="prev" href="../v1/">
+      
+      
+        <link rel="next" href="../managers-gateways/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Managers - netskope-sdwan-py-sdk</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#managers-package" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="netskope-sdwan-py-sdk" class="md-header__button md-logo" aria-label="netskope-sdwan-py-sdk" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            netskope-sdwan-py-sdk
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Managers
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ns-melamin/netskope-sdwan-py-sdk" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ns-melamin/netskope-sdwan-py-sdk
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="netskope-sdwan-py-sdk" class="md-nav__button md-logo" aria-label="netskope-sdwan-py-sdk" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    netskope-sdwan-py-sdk
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ns-melamin/netskope-sdwan-py-sdk" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ns-melamin/netskope-sdwan-py-sdk
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authentication
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Package
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Config
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../enums/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Enums
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pagination/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pagination
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tenant-resolution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tenant Resolution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../transport/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transport
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../v1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Legacy v1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Managers
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Managers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#netskopesdwan.managers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        managers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="managers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.AddressGroupManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AddressGroupManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.ApplicationManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ApplicationManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.AuditEventManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuditEventManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.CACertificateManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CACertificateManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.ClientManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ClientManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.ClientTemplateManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ClientTemplateManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.CloudAccountManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CloudAccountManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.ControllerManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ControllerManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.ControllerOperatorManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ControllerOperatorManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.DeviceGroupManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DeviceGroupManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayGroupManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GatewayGroupManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GatewayManager
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GatewayManager">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayManager.get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayManager.get_localui_password" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_localui_password
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayManager.get_ssh_password" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_ssh_password
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayManager.get_telemetry_overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_telemetry_overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayManager.list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayTemplateManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GatewayTemplateManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.InventoryDeviceManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InventoryDeviceManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.JWKSManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JWKSManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.NTPConfigManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NTPConfigManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.OverlayTagManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OverlayTagManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.PolicyManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PolicyManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.RadiusServerManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RadiusServerManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.ReadOnlyResourceManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ReadOnlyResourceManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.SegmentManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SegmentManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.SiteCommandManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SiteCommandManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.SoftwareManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SoftwareManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.TenantManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TenantManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.UserGroupManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UserGroupManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.UserManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UserManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.VPNPeerManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VPNPeerManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../managers-gateways/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gateway Manager Module
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../managers-resources/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resource Manager Module
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models-gateway/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gateway Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models-resource/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Resource Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models-download/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Download Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#netskopesdwan.managers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        managers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="managers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.AddressGroupManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AddressGroupManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.ApplicationManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ApplicationManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.AuditEventManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AuditEventManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.CACertificateManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CACertificateManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.ClientManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ClientManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.ClientTemplateManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ClientTemplateManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.CloudAccountManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CloudAccountManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.ControllerManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ControllerManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.ControllerOperatorManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ControllerOperatorManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.DeviceGroupManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DeviceGroupManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayGroupManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GatewayGroupManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GatewayManager
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GatewayManager">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayManager.get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayManager.get_localui_password" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_localui_password
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayManager.get_ssh_password" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_ssh_password
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayManager.get_telemetry_overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_telemetry_overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayManager.list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        list
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.GatewayTemplateManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GatewayTemplateManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.InventoryDeviceManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InventoryDeviceManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.JWKSManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JWKSManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.NTPConfigManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NTPConfigManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.OverlayTagManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OverlayTagManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.PolicyManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PolicyManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.RadiusServerManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RadiusServerManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.ReadOnlyResourceManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ReadOnlyResourceManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.SegmentManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SegmentManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.SiteCommandManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SiteCommandManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.SoftwareManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SoftwareManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.TenantManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TenantManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.UserGroupManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UserGroupManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.UserManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UserManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#netskopesdwan.managers.VPNPeerManager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VPNPeerManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="managers-package">Managers Package<a class="headerlink" href="#managers-package" title="Permanent link">&para;</a></h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<h2 id="netskopesdwan.managers" class="doc doc-heading">
+            <code>netskopesdwan.managers</code>
+
+
+<a href="#netskopesdwan.managers" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.AddressGroupManager" class="doc doc-heading">
+            <code>AddressGroupManager</code>
+
+
+<a href="#netskopesdwan.managers.AddressGroupManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/address-groups</code> and nested address object listing.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.ApplicationManager" class="doc doc-heading">
+            <code>ApplicationManager</code>
+
+
+<a href="#netskopesdwan.managers.ApplicationManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for application-related read-only endpoints.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.AuditEventManager" class="doc doc-heading">
+            <code>AuditEventManager</code>
+
+
+<a href="#netskopesdwan.managers.AuditEventManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/auditevents</code> with required bounded time filters.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.CACertificateManager" class="doc doc-heading">
+            <code>CACertificateManager</code>
+
+
+<a href="#netskopesdwan.managers.CACertificateManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/ca-certificates</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.ClientManager" class="doc doc-heading">
+            <code>ClientManager</code>
+
+
+<a href="#netskopesdwan.managers.ClientManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/clients</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.ClientTemplateManager" class="doc doc-heading">
+            <code>ClientTemplateManager</code>
+
+
+<a href="#netskopesdwan.managers.ClientTemplateManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/client-templates</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.CloudAccountManager" class="doc doc-heading">
+            <code>CloudAccountManager</code>
+
+
+<a href="#netskopesdwan.managers.CloudAccountManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/cloud-accounts</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.ControllerManager" class="doc doc-heading">
+            <code>ControllerManager</code>
+
+
+<a href="#netskopesdwan.managers.ControllerManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/controllers</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.ControllerOperatorManager" class="doc doc-heading">
+            <code>ControllerOperatorManager</code>
+
+
+<a href="#netskopesdwan.managers.ControllerOperatorManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/controller-operators</code> and related status lookups.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.DeviceGroupManager" class="doc doc-heading">
+            <code>DeviceGroupManager</code>
+
+
+<a href="#netskopesdwan.managers.DeviceGroupManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/device-groups</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.GatewayGroupManager" class="doc doc-heading">
+            <code>GatewayGroupManager</code>
+
+
+<a href="#netskopesdwan.managers.GatewayGroupManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/gateway-groups</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.GatewayManager" class="doc doc-heading">
+            <code>GatewayManager</code>
+
+
+<a href="#netskopesdwan.managers.GatewayManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="netskopesdwan.managers.base.BaseManager">BaseManager</span></code></p>
+
+
+
+        <p>Read-only manager for <code>/v2/gateways</code> endpoints.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="netskopesdwan.managers.GatewayManager.get" class="doc doc-heading">
+            <code class=" language-python"><span class="n">get</span><span class="p">(</span><span class="n">gateway_id</span><span class="p">)</span></code>
+
+<a href="#netskopesdwan.managers.GatewayManager.get" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fetch one gateway by ID.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="netskopesdwan.managers.GatewayManager.get_localui_password" class="doc doc-heading">
+            <code class=" language-python"><span class="n">get_localui_password</span><span class="p">(</span><span class="n">gateway_id</span><span class="p">)</span></code>
+
+<a href="#netskopesdwan.managers.GatewayManager.get_localui_password" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fetch the local UI password payload for a gateway.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="netskopesdwan.managers.GatewayManager.get_ssh_password" class="doc doc-heading">
+            <code class=" language-python"><span class="n">get_ssh_password</span><span class="p">(</span><span class="n">gateway_id</span><span class="p">)</span></code>
+
+<a href="#netskopesdwan.managers.GatewayManager.get_ssh_password" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fetch the SSH password payload for a gateway.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="netskopesdwan.managers.GatewayManager.get_telemetry_overview" class="doc doc-heading">
+            <code class=" language-python"><span class="n">get_telemetry_overview</span><span class="p">(</span><span class="n">gateway_id</span><span class="p">)</span></code>
+
+<a href="#netskopesdwan.managers.GatewayManager.get_telemetry_overview" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Fetch the raw telemetry overview payload for a gateway.</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="netskopesdwan.managers.GatewayManager.list" class="doc doc-heading">
+            <code class=" language-python"><span class="nb">list</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">after</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">first</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#netskopesdwan.managers.GatewayManager.list" class="headerlink" title="Permanent link">&para;</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>List gateways.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>after</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Cursor used for forward pagination.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>first</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Maximum number of items to return.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sort</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Raw backend sort expression.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>filter</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Raw backend filter expression such as <code>status:up</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.GatewayTemplateManager" class="doc doc-heading">
+            <code>GatewayTemplateManager</code>
+
+
+<a href="#netskopesdwan.managers.GatewayTemplateManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/gateway-templates</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.InventoryDeviceManager" class="doc doc-heading">
+            <code>InventoryDeviceManager</code>
+
+
+<a href="#netskopesdwan.managers.InventoryDeviceManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/inventory-devices</code> list operations.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.JWKSManager" class="doc doc-heading">
+            <code>JWKSManager</code>
+
+
+<a href="#netskopesdwan.managers.JWKSManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="netskopesdwan.managers.base.BaseManager">BaseManager</span></code></p>
+
+
+
+        <p>Manager for controller JWKS retrieval endpoints.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.NTPConfigManager" class="doc doc-heading">
+            <code>NTPConfigManager</code>
+
+
+<a href="#netskopesdwan.managers.NTPConfigManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/ntp-configs</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.OverlayTagManager" class="doc doc-heading">
+            <code>OverlayTagManager</code>
+
+
+<a href="#netskopesdwan.managers.OverlayTagManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/overlay-tags</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.PolicyManager" class="doc doc-heading">
+            <code>PolicyManager</code>
+
+
+<a href="#netskopesdwan.managers.PolicyManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/policies</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.RadiusServerManager" class="doc doc-heading">
+            <code>RadiusServerManager</code>
+
+
+<a href="#netskopesdwan.managers.RadiusServerManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/radius-servers</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.ReadOnlyResourceManager" class="doc doc-heading">
+            <code>ReadOnlyResourceManager</code>
+
+
+<a href="#netskopesdwan.managers.ReadOnlyResourceManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="netskopesdwan.managers.base.BaseManager">BaseManager</span></code></p>
+
+
+
+        <p>Base manager for simple v2 list/get resources that share a common response shape.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.SegmentManager" class="doc doc-heading">
+            <code>SegmentManager</code>
+
+
+<a href="#netskopesdwan.managers.SegmentManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/segments</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.SiteCommandManager" class="doc doc-heading">
+            <code>SiteCommandManager</code>
+
+
+<a href="#netskopesdwan.managers.SiteCommandManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/site-command</code> and command output downloads.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.SoftwareManager" class="doc doc-heading">
+            <code>SoftwareManager</code>
+
+
+<a href="#netskopesdwan.managers.SoftwareManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for software metadata and binary download endpoints.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.TenantManager" class="doc doc-heading">
+            <code>TenantManager</code>
+
+
+<a href="#netskopesdwan.managers.TenantManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/tenants</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.UserGroupManager" class="doc doc-heading">
+            <code>UserGroupManager</code>
+
+
+<a href="#netskopesdwan.managers.UserGroupManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/user-groups</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.UserManager" class="doc doc-heading">
+            <code>UserManager</code>
+
+
+<a href="#netskopesdwan.managers.UserManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/users</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="netskopesdwan.managers.VPNPeerManager" class="doc doc-heading">
+            <code>VPNPeerManager</code>
+
+
+<a href="#netskopesdwan.managers.VPNPeerManager" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="ReadOnlyResourceManager (netskopesdwan.managers.resources.ReadOnlyResourceManager)" href="../managers-resources/#netskopesdwan.managers.resources.ReadOnlyResourceManager">ReadOnlyResourceManager</a></code></p>
+
+
+
+        <p>Manager for <code>/v2/vpnpeers</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
