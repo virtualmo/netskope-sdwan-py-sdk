@@ -1,8 +1,8 @@
 from .gateways import GatewayManager
 from .resources import (
     AddressGroupManager,
-    AuditEventManager,
     ApplicationManager,
+    AuditEventManager,
     CACertificateManager,
     ClientManager,
     ClientTemplateManager,

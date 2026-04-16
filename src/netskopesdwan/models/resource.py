@@ -11,7 +11,7 @@ class ResourceRecord:
     raw: dict[str, Any] | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ResourceRecord":
+    def from_dict(cls, data: dict[str, Any]) -> ResourceRecord:
         return cls(
             id=_to_required_id(data),
             name=_to_optional_str(data.get("name")),

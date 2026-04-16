@@ -5,10 +5,10 @@ import pytest
 from netskopesdwan import SDWANClient
 from netskopesdwan.exceptions import APIResponseError
 from netskopesdwan.managers.gateways import (
-    GATEWAYS_PATH,
     GATEWAY_BY_ID_PATH,
     GATEWAY_LOCALUI_PASSWORD_PATH,
     GATEWAY_SSH_PASSWORD_PATH,
+    GATEWAYS_PATH,
 )
 from netskopesdwan.models.gateway import Gateway
 from tests.fixtures import (

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import Callable
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from netskopesdwan import SDWANClient
@@ -65,7 +65,7 @@ def summarize(value: Any) -> str:
 
 
 def default_audit_range() -> tuple[str, str]:
-    end = datetime.now(timezone.utc)
+    end = datetime.now(UTC)
     start = end - timedelta(hours=24)
     return to_iso8601_z(start), to_iso8601_z(end)
 

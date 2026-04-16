@@ -257,7 +257,11 @@ def _normalize_infiot_host(host: str) -> str:
     if remainder == ["infiot", "net"]:
         return f"{tenant}.api.infiot.net"
 
-    if len(remainder) == 3 and remainder[1:] == ["infiot", "net"] and remainder[0] in _INFIOT_REGIONS:
+    if (
+        len(remainder) == 3
+        and remainder[1:] == ["infiot", "net"]
+        and remainder[0] in _INFIOT_REGIONS
+    ):
         return f"{tenant}.api.{remainder[0]}.infiot.net"
 
     raise ResolutionError(f"Unsupported infiot host format: {host!r}.")

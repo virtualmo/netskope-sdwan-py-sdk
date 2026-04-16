@@ -5,7 +5,6 @@ import json
 import pytest
 import requests
 
-from netskopesdwan.models.download import DownloadResult
 from netskopesdwan.exceptions import (
     APIResponseError,
     AuthenticationError,
@@ -14,6 +13,7 @@ from netskopesdwan.exceptions import (
     RateLimitError,
     ValidationError,
 )
+from netskopesdwan.models.download import DownloadResult
 from netskopesdwan.transport import Transport
 from tests.fixtures import error_response_fixture
 

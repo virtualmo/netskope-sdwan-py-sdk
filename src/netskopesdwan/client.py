@@ -4,8 +4,8 @@ from .config import ClientSettings, load_settings
 from .managers.gateways import GatewayManager
 from .managers.resources import (
     AddressGroupManager,
-    AuditEventManager,
     ApplicationManager,
+    AuditEventManager,
     CACertificateManager,
     ClientManager,
     ClientTemplateManager,

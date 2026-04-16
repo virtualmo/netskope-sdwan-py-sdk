@@ -16,7 +16,7 @@ class Gateway:
     device_config_raw: dict[str, Any] | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Gateway":
+    def from_dict(cls, data: dict[str, Any]) -> Gateway:
         return cls(
             id=str(data.get("id") or ""),
             name=_to_optional_str(data.get("name")),

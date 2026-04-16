@@ -70,14 +70,10 @@ def _parse_gateway_list_response(
 
 def _parse_gateway_object_response(payload: Any) -> Gateway:
     if not isinstance(payload, dict):
-        raise APIResponseError(
-            "Gateway detail response must be a top-level JSON object."
-        )
+        raise APIResponseError("Gateway detail response must be a top-level JSON object.")
     gateway = _adapt_gateway(payload)
     if not gateway.id:
-        raise APIResponseError(
-            "Gateway detail response did not include the required 'id' field."
-        )
+        raise APIResponseError("Gateway detail response did not include the required 'id' field.")
     return gateway
 
 
@@ -91,9 +87,7 @@ def _adapt_gateway(payload: Any, *, resource_label: str = "gateway") -> Gateway:
 
 def _parse_gateway_password_response(payload: Any, *, password_type: str) -> dict[str, Any]:
     if not isinstance(payload, dict):
-        raise APIResponseError(
-            f"Gateway {password_type} response must be a top-level JSON object."
-        )
+        raise APIResponseError(f"Gateway {password_type} response must be a top-level JSON object.")
     return payload
 
 

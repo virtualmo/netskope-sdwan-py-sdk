@@ -560,9 +560,7 @@ def _parse_resource_detail_response(payload: Any, *, resource_label: str) -> Res
 
 def _adapt_resource(payload: Any, *, resource_label: str) -> ResourceRecord:
     if not isinstance(payload, dict):
-        raise APIResponseError(
-            f"{_label(resource_label)} payload items must be JSON objects."
-        )
+        raise APIResponseError(f"{_label(resource_label)} payload items must be JSON objects.")
     return ResourceRecord.from_dict(payload)
 
 

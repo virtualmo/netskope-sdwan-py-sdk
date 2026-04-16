@@ -4,7 +4,6 @@ from typing import Any
 
 import requests
 
-from .models.download import DownloadResult
 from .exceptions import (
     APIResponseError,
     AuthenticationError,
@@ -13,6 +12,7 @@ from .exceptions import (
     RateLimitError,
     ValidationError,
 )
+from .models.download import DownloadResult
 
 
 class Transport:

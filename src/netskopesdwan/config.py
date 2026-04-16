@@ -5,7 +5,6 @@ from dataclasses import dataclass
 
 from .exceptions import ConfigurationError
 
-
 ENV_BASE_URL = "NETSKOPESDWAN_BASE_URL"
 ENV_TENANT_URL = "NETSKOPESDWAN_TENANT_URL"
 ENV_API_TOKEN = "NETSKOPESDWAN_API_TOKEN"
