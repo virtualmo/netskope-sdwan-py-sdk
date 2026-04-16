@@ -2,6 +2,8 @@
 
 `netskope-sdwan-py-sdk` is an unofficial, read-only Python SDK for Netskope SD-WAN APIs. It is designed for scripts, diagnostics, and internal tooling that need predictable GET access to the API without hiding request details behind heavy abstractions.
 
+[![Docs](https://img.shields.io/badge/docs-online-blue)](https://virtualmo.github.io/netskope-sdwan-py-sdk/)
+
 ## Overview
 
 This SDK is intentionally narrow and practical:
