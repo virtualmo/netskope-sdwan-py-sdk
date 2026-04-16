@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pprint import pprint
 from typing import Any
 
 from netskopesdwan import SDWANClient
 from netskopesdwan.exceptions import APIResponseError, ValidationError
-from netskopesdwan.models.download import DownloadResult
 
 
 @dataclass(frozen=True)
@@ -19,33 +19,38 @@ def print_section(title: str) -> None:
     print("-" * len(title))
 
 
-def summarize(value: Any) -> str:
-    if isinstance(value, list):
-        return f"ok list(len={len(value)})"
-    if isinstance(value, dict):
-        keys = list(value.keys())[:6]
-        return f"ok dict(keys={keys})"
-    if isinstance(value, DownloadResult):
-        return f"ok DownloadResult(size={len(value.content)} bytes)"
-    return "ok"
-
-
-def looks_like_environment_skip(exc: Exception) -> bool:
-    if isinstance(exc, ValidationError):
-        return True
-
-    message = str(exc).lower()
+def looks_like_unsupported_monitoring_error(message: str) -> bool:
+    lowered = message.lower()
     return (
-        "http 400" in message
-        or "unsupported" in message
-        or "not available" in message
-        or "not enabled" in message
-        or "feature" in message
+        "http 400" in lowered
+        or "unsupported" in lowered
+        or "not available" in lowered
+        or "not enabled" in lowered
+        or "feature" in lowered
     )
 
 
-def print_result(name: str, status: str, detail: str) -> None:
-    print(f"{name:<32} {status:<4} {detail}")
+def print_payload(value: Any) -> None:
+    pprint(value, sort_dicts=False)
+
+
+def run_example(example: MonitoringExample) -> None:
+    print_section(f"Monitoring: {example.name}")
+
+    try:
+        payload = example.call()
+    except ValidationError:
+        print("Unsupported for this gateway/tenant/feature set")
+    except APIResponseError as exc:
+        message = str(exc)
+        if looks_like_unsupported_monitoring_error(message):
+            print("Unsupported for this gateway/tenant/feature set")
+        else:
+            print(f"API error: {message}")
+    except Exception as exc:
+        print(f"Unexpected error: {exc.__class__.__name__}: {exc}")
+    else:
+        print_payload(payload)
 
 
 def main() -> None:
@@ -129,41 +134,8 @@ def main() -> None:
         ),
     ]
 
-    passed = 0
-    skipped = 0
-    failed = 0
-
-    print_section("Monitoring")
-
     for example in examples:
-        try:
-            payload = example.call()
-        except APIResponseError as exc:
-            print_result(example.name, "FAIL", str(exc))
-            failed += 1
-        except Exception as exc:
-            if looks_like_environment_skip(exc):
-                print_result(
-                    example.name,
-                    "SKIP",
-                    "unsupported for this gateway/tenant/feature set",
-                )
-                skipped += 1
-            else:
-                print_result(
-                    example.name,
-                    "FAIL",
-                    f"{exc.__class__.__name__}: {exc}",
-                )
-                failed += 1
-        else:
-            print_result(example.name, "PASS", summarize(payload))
-            passed += 1
-
-    print_section("Totals")
-    print(f"passed:  {passed}")
-    print(f"skipped: {skipped}")
-    print(f"failed:  {failed}")
+        run_example(example)
 
 
 if __name__ == "__main__":
