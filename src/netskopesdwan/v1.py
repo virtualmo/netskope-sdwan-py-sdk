@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from enum import Enum
 from typing import Any
 
+from .enums import V1MonitoringWANMetric
 from .exceptions import APIResponseError
 from .managers.base import BaseManager
 from .models.resource import ResourceRecord
@@ -289,7 +291,7 @@ class V1MonitoringManager(BaseManager):
         child_tenant_id: str | None = None,
         start_datetime: str | None = None,
         end_datetime: str | None = None,
-        metric: str | None = None,
+        metric: V1MonitoringWANMetric | str | None = None,
         time_slots: int | None = None,
     ) -> list[dict[str, Any]] | dict[str, Any]:
         return self._get_raw_payload(
@@ -298,7 +300,7 @@ class V1MonitoringManager(BaseManager):
                 child_tenant_id=child_tenant_id,
                 start_datetime=start_datetime,
                 end_datetime=end_datetime,
-                metric=metric,
+                metric=_enum_value(metric),
                 time_slots=time_slots,
             ),
         )
@@ -357,6 +359,12 @@ class V1UserManager(BaseManager):
 def _parse_v1_resource_list(payload: Any, *, resource_label: str) -> list[ResourceRecord]:
     items = _parse_v1_enveloped_list(payload, resource_label=resource_label)
     return [ResourceRecord.from_dict(item) for item in items]
+
+
+def _enum_value(value: str | Enum | None) -> str | None:
+    if isinstance(value, Enum):
+        return str(value.value)
+    return value
 
 
 def _parse_v1_resource_detail(payload: Any, *, resource_label: str) -> ResourceRecord:

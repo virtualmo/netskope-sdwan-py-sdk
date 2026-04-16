@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from netskopesdwan import SDWANClient
+from netskopesdwan import SDWANClient, V1MonitoringWANMetric
 from netskopesdwan.exceptions import APIResponseError
 from netskopesdwan.models.resource import ResourceRecord
 
@@ -145,6 +145,54 @@ def test_v1_monitoring_helpers_parse_raw_payloads() -> None:
         end_datetime="2024-01-02T00:00:00Z",
         time_slots=24,
     ) == {"cpu": 10}
+
+
+def test_v1_monitoring_get_paths_links_accepts_metric_enum() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/monitoring/gateways/gw-001/wan/paths_links"
+        assert params == {
+            "startDatetime": "2024-01-01T00:00:00Z",
+            "endDatetime": "2024-01-02T00:00:00Z",
+            "metric": "latency",
+        }
+        return [{"metric": "latency"}]
+
+    client.transport.get = fake_get
+
+    payload = client.v1.monitoring.get_paths_links(
+        "gw-001",
+        start_datetime="2024-01-01T00:00:00Z",
+        end_datetime="2024-01-02T00:00:00Z",
+        metric=V1MonitoringWANMetric.LATENCY,
+    )
+
+    assert payload == [{"metric": "latency"}]
+
+
+def test_v1_monitoring_get_paths_links_accepts_metric_string() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/monitoring/gateways/gw-001/wan/paths_links"
+        assert params == {
+            "startDatetime": "2024-01-01T00:00:00Z",
+            "endDatetime": "2024-01-02T00:00:00Z",
+            "metric": "latency",
+        }
+        return [{"metric": "latency"}]
+
+    client.transport.get = fake_get
+
+    payload = client.v1.monitoring.get_paths_links(
+        "gw-001",
+        start_datetime="2024-01-01T00:00:00Z",
+        end_datetime="2024-01-02T00:00:00Z",
+        metric="latency",
+    )
+
+    assert payload == [{"metric": "latency"}]
 
 
 def test_v1_users_get_groups_parses_resource_records() -> None:

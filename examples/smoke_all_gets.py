@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from netskopesdwan import SDWANClient
+from netskopesdwan import SDWANClient, V1MonitoringWANMetric
 from netskopesdwan.exceptions import NotFoundError, PermissionDeniedError, ValidationError
 from netskopesdwan.models import DownloadResult
 
@@ -665,7 +665,7 @@ def build_targets(
                 seed,
                 start_datetime=monitoring_from,
                 end_datetime=monitoring_to,
-                metric="latency",
+                metric=V1MonitoringWANMetric.LATENCY,
             ),
             seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,

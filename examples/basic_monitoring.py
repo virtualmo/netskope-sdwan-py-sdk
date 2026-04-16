@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 from pprint import pprint
 from typing import Any
 
-from netskopesdwan import SDWANClient
+from netskopesdwan import SDWANClient, V1MonitoringWANMetric
 from netskopesdwan.exceptions import APIResponseError, ValidationError
 
 
@@ -171,7 +171,7 @@ def main() -> None:
                 gateway_id,
                 start_datetime=start_date,
                 end_datetime=end_date,
-                metric="latency",
+                metric=V1MonitoringWANMetric.LATENCY,
             ),
         ),
         MonitoringExample(
