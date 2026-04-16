@@ -42,6 +42,12 @@ def default_audit_range() -> tuple[str, str]:
     return to_iso8601_z(start), to_iso8601_z(end)
 
 
+def default_time_window() -> tuple[str, str]:
+    end = datetime.now(UTC)
+    start = end - timedelta(minutes=60)
+    return to_iso8601_z(start), to_iso8601_z(end)
+
+
 def to_iso8601_z(value: datetime) -> str:
     return value.replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -161,6 +167,8 @@ def build_targets(
     *,
     audit_from: str,
     audit_to: str,
+    monitoring_from: str,
+    monitoring_to: str,
     site_command_output_name: str | None,
 ) -> list[SmokeTarget]:
     # Add new GET endpoints here. Seeded targets reuse prior list results through the cache.
@@ -541,7 +549,11 @@ def build_targets(
         SmokeTarget(
             "v1.monitoring.get_device_flows_totals",
             "v1.monitoring.get_device_flows_totals(gateway_id)",
-            lambda c, seed: c.v1.monitoring.get_device_flows_totals(seed),
+            lambda c, seed: c.v1.monitoring.get_device_flows_totals(
+                seed,
+                start_datetime=monitoring_from,
+                end_datetime=monitoring_to,
+            ),
             seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
@@ -550,7 +562,11 @@ def build_targets(
         SmokeTarget(
             "v1.monitoring.get_devices_totals",
             "v1.monitoring.get_devices_totals(gateway_id)",
-            lambda c, seed: c.v1.monitoring.get_devices_totals(seed),
+            lambda c, seed: c.v1.monitoring.get_devices_totals(
+                seed,
+                start_datetime=monitoring_from,
+                end_datetime=monitoring_to,
+            ),
             seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
@@ -580,7 +596,11 @@ def build_targets(
         SmokeTarget(
             "v1.monitoring.get_system_load",
             "v1.monitoring.get_system_load(gateway_id)",
-            lambda c, seed: c.v1.monitoring.get_system_load(seed),
+            lambda c, seed: c.v1.monitoring.get_system_load(
+                seed,
+                start_datetime=monitoring_from,
+                end_datetime=monitoring_to,
+            ),
             seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
@@ -589,7 +609,11 @@ def build_targets(
         SmokeTarget(
             "v1.monitoring.get_system_lte",
             "v1.monitoring.get_system_lte(gateway_id)",
-            lambda c, seed: c.v1.monitoring.get_system_lte(seed),
+            lambda c, seed: c.v1.monitoring.get_system_lte(
+                seed,
+                start_datetime=monitoring_from,
+                end_datetime=monitoring_to,
+            ),
             seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
@@ -598,7 +622,11 @@ def build_targets(
         SmokeTarget(
             "v1.monitoring.get_system_memory",
             "v1.monitoring.get_system_memory(gateway_id)",
-            lambda c, seed: c.v1.monitoring.get_system_memory(seed),
+            lambda c, seed: c.v1.monitoring.get_system_memory(
+                seed,
+                start_datetime=monitoring_from,
+                end_datetime=monitoring_to,
+            ),
             seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
@@ -607,7 +635,11 @@ def build_targets(
         SmokeTarget(
             "v1.monitoring.get_system_uptime",
             "v1.monitoring.get_system_uptime(gateway_id)",
-            lambda c, seed: c.v1.monitoring.get_system_uptime(seed),
+            lambda c, seed: c.v1.monitoring.get_system_uptime(
+                seed,
+                start_datetime=monitoring_from,
+                end_datetime=monitoring_to,
+            ),
             seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
@@ -616,7 +648,11 @@ def build_targets(
         SmokeTarget(
             "v1.monitoring.get_system_wifi",
             "v1.monitoring.get_system_wifi(gateway_id)",
-            lambda c, seed: c.v1.monitoring.get_system_wifi(seed),
+            lambda c, seed: c.v1.monitoring.get_system_wifi(
+                seed,
+                start_datetime=monitoring_from,
+                end_datetime=monitoring_to,
+            ),
             seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
@@ -625,7 +661,11 @@ def build_targets(
         SmokeTarget(
             "v1.monitoring.get_paths_links",
             "v1.monitoring.get_paths_links(gateway_id)",
-            lambda c, seed: c.v1.monitoring.get_paths_links(seed),
+            lambda c, seed: c.v1.monitoring.get_paths_links(
+                seed,
+                start_datetime=monitoring_from,
+                end_datetime=monitoring_to,
+            ),
             seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
@@ -634,7 +674,11 @@ def build_targets(
         SmokeTarget(
             "v1.monitoring.get_paths_links_totals",
             "v1.monitoring.get_paths_links_totals(gateway_id)",
-            lambda c, seed: c.v1.monitoring.get_paths_links_totals(seed),
+            lambda c, seed: c.v1.monitoring.get_paths_links_totals(
+                seed,
+                start_datetime=monitoring_from,
+                end_datetime=monitoring_to,
+            ),
             seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,
             exception_classifier=classify_optional_monitoring_exception,
@@ -835,6 +879,10 @@ def main() -> None:
     audit_to = env("NETSKOPESDWAN_AUDIT_TO")
     if not audit_from or not audit_to:
         audit_from, audit_to = default_audit_range()
+    monitoring_from = env("NETSKOPESDWAN_MONITORING_FROM")
+    monitoring_to = env("NETSKOPESDWAN_MONITORING_TO")
+    if not monitoring_from or not monitoring_to:
+        monitoring_from, monitoring_to = default_time_window()
 
     client = SDWANClient(
         base_url=base_url,
@@ -845,12 +893,15 @@ def main() -> None:
 
     print_connection(client)
     print(f"Audit window: {audit_from} -> {audit_to}")
+    print(f"Monitoring window: {monitoring_from} -> {monitoring_to}")
     print()
 
     DEPENDENCY_VALUES.clear()
     targets = build_targets(
         audit_from=audit_from,
         audit_to=audit_to,
+        monitoring_from=monitoring_from,
+        monitoring_to=monitoring_to,
         site_command_output_name=site_command_output_name,
     )
     registry = {target.name: target for target in targets}
