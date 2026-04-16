@@ -665,6 +665,7 @@ def build_targets(
                 seed,
                 start_datetime=monitoring_from,
                 end_datetime=monitoring_to,
+                metric="latency",
             ),
             seed_from="gateways.list_prefer_up_for_monitoring",
             seed_extractor=extract_gateway_candidate_ids,

@@ -171,6 +171,7 @@ def main() -> None:
                 gateway_id,
                 start_datetime=start_date,
                 end_datetime=end_date,
+                metric="latency",
             ),
         ),
         MonitoringExample(
