@@ -1,5 +1,5 @@
-[![PyPI version](https://img.shields.io/pypi/v/netskope-sdwan.svg)](https://pypi.org/project/netskope-sdwan/)
-![Python](https://img.shields.io/pypi/pyversions/netskope-sdwan)
+[![PyPI version](https://img.shields.io/pypi/v/netskope-sdwan-py-sdk.svg)](https://pypi.org/project/netskope-sdwan-py-sdk/)
+![Python](https://img.shields.io/pypi/pyversions/netskope-sdwan-py-sdk)
 ![License](https://img.shields.io/github/license/virtualmo/netskope-sdwan-py-sdk)
 ![CI](https://github.com/virtualmo/netskope-sdwan-py-sdk/actions/workflows/ci.yml/badge.svg)
 [![Docs](https://img.shields.io/badge/docs-online-blue)](https://virtualmo.github.io/netskope-sdwan-py-sdk/)
@@ -222,7 +222,8 @@ Not implemented:
 ## Documentation & API Reference
 
 Full API reference and usage guides:
-👉 https://virtualmo.github.io/netskope-sdwan-py-sdk/
+
+📚 https://virtualmo.github.io/netskope-sdwan-py-sdk/
 
 ## Disclaimer
 
