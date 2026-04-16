@@ -1,8 +1,17 @@
+[![PyPI version](https://img.shields.io/pypi/v/netskope-sdwan.svg)](https://pypi.org/project/netskope-sdwan/)
+![Python](https://img.shields.io/pypi/pyversions/netskope-sdwan)
+![License](https://img.shields.io/github/license/virtualmo/netskope-sdwan-py-sdk)
+![CI](https://github.com/virtualmo/netskope-sdwan-py-sdk/actions/workflows/ci.yml/badge.svg)
+[![Docs](https://img.shields.io/badge/docs-online-blue)](https://virtualmo.github.io/netskope-sdwan-py-sdk/)
+![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
+![Lint](https://img.shields.io/badge/lint-ruff-blue)
+![Status](https://img.shields.io/badge/status-alpha-orange)
+
+
 # netskope-sdwan-py-sdk
 
 `netskope-sdwan-py-sdk` is an unofficial, read-only Python SDK for Netskope SD-WAN APIs. It is designed for scripts, diagnostics, and internal tooling that need predictable GET access to the API without hiding request details behind heavy abstractions.
 
-[![Docs](https://img.shields.io/badge/docs-online-blue)](https://virtualmo.github.io/netskope-sdwan-py-sdk/)
 
 ## Overview
 
@@ -209,6 +218,11 @@ Not implemented:
 - `POST`, `PUT`, `PATCH`, `DELETE`
 - async support
 - automatic DNS or CNAME discovery
+
+## Documentation & API Reference
+
+Full API reference and usage guides:
+👉 https://virtualmo.github.io/netskope-sdwan-py-sdk/
 
 ## Disclaimer
 
