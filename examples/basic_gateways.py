@@ -46,6 +46,8 @@ def main() -> None:
 
     try:
         gateways = client.gateways.list()
+        # This uses the supported filter syntax to request only online gateways.
+        online_gateways = client.gateways.list(filter="status:up")
     except APIResponseError as exc:
         message = str(exc)
         if looks_like_invalid_tenant_error(message):
@@ -69,7 +71,8 @@ def main() -> None:
         print(f"Unexpected error while listing gateways: {exc.__class__.__name__}: {exc}")
         return
 
-    print("Gateways:", gateways)
+    print("All gateways:", gateways)
+    print("Online gateways (filter=status:up):", online_gateways)
 
 
 if __name__ == "__main__":
