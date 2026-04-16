@@ -31,6 +31,7 @@ from .managers.resources import (
 )
 from .tenant_resolution import ResolutionResult, resolve_api_base_url
 from .transport import Transport
+from .v1 import LegacyV1Namespace
 
 
 class SDWANClient:
@@ -94,3 +95,4 @@ class SDWANClient:
         self.vpn_peers = VPNPeerManager(self.transport)
         self.policies = PolicyManager(self.transport)
         self.radius_servers = RadiusServerManager(self.transport)
+        self.v1 = LegacyV1Namespace(self.transport)

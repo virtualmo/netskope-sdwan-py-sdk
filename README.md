@@ -1,33 +1,25 @@
 # netskope-sdwan-py-sdk
 
-`netskope-sdwan-py-sdk` is an API-first, read-only Python SDK scaffold for Netskope SD-WAN.
+`netskope-sdwan-py-sdk` is a read-only Python SDK for Netskope SD-WAN.
 
-This first milestone focuses on:
+Current design:
 
-- installable packaging
-- `SDWANClient`
-- centralized HTTP transport
-- tenant and base URL normalization
-- read-only GET managers for gateways, addressing, applications, audit, certificates/auth, clients, controllers, site commands, software, tenant/identity, cloud accounts, groups, templates, inventory, network, policy, and RADIUS resources
-- lightweight tests with no live API dependency
+- GET only
+- v2-first client surface
+- legacy v1 endpoints isolated under `client.v1.*`
+- lightweight models by default
 
 ## Requirements
 
 - Python 3.11+
 
-## Getting Started
+## Install
 
 ```bash
 git clone https://github.com/ns-melamin/netskope-sdwan-py-sdk.git
 cd netskope-sdwan-py-sdk
-```
-
-```bash
 python3.11 -m venv .venv
 source .venv/bin/activate
-```
-
-```bash
 pip install -e .[dev]
 ```
 
@@ -37,26 +29,14 @@ pip install -e .[dev]
 pytest -q
 ```
 
-## Linting
-
-```bash
-ruff check .
-```
-
-## Run Example
+## Examples
 
 ```bash
 python examples/basic_gateways.py
+python examples/smoke_all_gets.py
 ```
 
-## Usage
-
-Current V1.5 usage is read-only.
-
-`client.audit_events.list(...)` requires a bounded `created_at_from` / `created_at_to` query window.
-`client.site_commands.get_output(...)` returns binary download content/bytes with headers, not plain text.
-
-Direct API URL:
+## Basic v2 Usage
 
 ```python
 from netskopesdwan import SDWANClient
@@ -67,40 +47,46 @@ client = SDWANClient(
 )
 
 gateways = client.gateways.list()
+gateway = client.gateways.get("gw-001")
 ```
 
-Tenant URL with explicit SD-WAN tenant override:
+## Legacy v1 Usage
+
+V2 is the primary surface. Transitional v1-only GET endpoints remain available under `client.v1`.
 
 ```python
 from netskopesdwan import SDWANClient
 
 client = SDWANClient(
-    tenant_url="customer.de.goskope.com",
-    sdwan_tenant_name="legacy123",
+    base_url="https://customer.api.eu.infiot.net",
     api_token="TOKEN",
 )
+
+edges = client.v1.edges.list()
+interfaces = client.v1.monitoring.get_interfaces_latest("gw-001")
+groups = client.v1.users.get_groups("user-001")
 ```
 
-## Important Tenant Resolution Note
+## Behavior Notes
 
-For goskope tenant URLs, V1 currently supports deterministic region mapping for known suffixes such as `.de.goskope.com`, `.eu.goskope.com`, and `.au.goskope.com`. Generic `*.goskope.com` tenant URLs are not yet supported unless you provide the direct SD-WAN `base_url`.
+- `client.audit_events.list(...)` requires both `created_at_from` and `created_at_to`.
+- `client.site_commands.get_output(...)` returns a `DownloadResult` with bytes and download headers.
+- Gateways use a structured `Gateway` model. Most other JSON resources use shallow `ResourceRecord` wrappers with the original payload preserved in `.raw`.
 
-Example:
+## Tenant Resolution
+
+Direct API URLs work as-is:
 
 ```python
-from netskopesdwan import SDWANClient
-
 client = SDWANClient(
     base_url="https://legacy123.api.eu.infiot.net",
     api_token="TOKEN",
 )
 ```
 
-Or, if you know the SD-WAN tenant name and are using a supported deterministic goskope suffix:
+Supported goskope tenant URLs can also be resolved when you provide the SD-WAN tenant name:
 
 ```python
-from netskopesdwan import SDWANClient
-
 client = SDWANClient(
     tenant_url="customer.de.goskope.com",
     sdwan_tenant_name="legacy123",
@@ -110,22 +96,15 @@ client = SDWANClient(
 
 ## Current Scope
 
-Implemented in this milestone:
+Implemented:
 
-- `client.gateways.list()`
-- `client.gateways.get(gateway_id)`
-- read-only special methods for `address_groups.list_address_objects(group_id)`, `controllers.get_operator_status(controller_id)`, `site_commands.get_output(command_id, name)`, `applications.list_*() / get_custom_app(id)`, `software.list_versions() / list_downloads()`, and `jwks.get()`
-- read-only managers for `address_groups`, `applications`, `audit_events`, `ca_certificates`, `client_templates`, `clients`, `cloud_accounts`, `controller_operators`, `controllers`, `device_groups`, `gateway_groups`, `gateway_templates`, `inventory_devices`, `jwks`, `ntp_configs`, `overlay_tags`, `policies`, `radius_servers`, `segments`, `site_commands`, `software`, `tenants`, `user_groups`, `users`, and `vpn_peers`
+- read-only v2 managers for gateways, infrastructure, policy, identity, software, controller, cloud, and certificate resources
+- read-only helper methods for nested or special GETs such as address objects, controller operator status, JWKS, software downloads, and site command output
+- transitional v1 managers under `client.v1.edges`, `client.v1.monitoring`, and `client.v1.users`
 
-Not implemented yet:
+Not implemented:
 
-- write operations
-- live DNS/CNAME discovery
+- POST, PUT, PATCH, DELETE
 - async support
 - CLI or MCP integrations
-
-## Future Installation (planned)
-
-```bash
-pip install netskopesdwan
-```
+- live DNS or CNAME discovery

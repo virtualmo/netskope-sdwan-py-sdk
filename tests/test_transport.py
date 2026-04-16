@@ -30,7 +30,10 @@ from tests.fixtures import error_response_fixture
         (500, APIResponseError),
     ],
 )
-def test_transport_maps_http_statuses(status_code: int, expected_exception: type[Exception]) -> None:
+def test_transport_maps_http_statuses(
+    status_code: int,
+    expected_exception: type[Exception],
+) -> None:
     transport = Transport(
         base_url="https://tenant.api.infiot.net",
         api_token="TOKEN",
@@ -158,6 +161,36 @@ def test_transport_get_download_preserves_json_error_handling(monkeypatch) -> No
         transport.get_download("/v2/site-command/cmd-001/output/stdout")
 
     assert "error_code=GW_NOT_FOUND" in str(excinfo.value)
+
+
+def test_transport_request_includes_request_context_for_non_json_success(
+    monkeypatch,
+) -> None:
+    transport = Transport(
+        base_url="https://tenant.api.infiot.net",
+        api_token="TOKEN",
+        timeout=30,
+        verify_ssl=True,
+    )
+    response = _build_response(
+        status_code=200,
+        body="not json",
+        url="https://tenant.api.infiot.net/v2/gateways",
+        method="GET",
+        content_type="text/plain",
+    )
+
+    def fake_request(**kwargs):
+        return response
+
+    monkeypatch.setattr(transport.session, "request", fake_request)
+
+    with pytest.raises(APIResponseError) as excinfo:
+        transport.request("GET", "/v2/gateways")
+
+    message = str(excinfo.value)
+    assert "GET https://tenant.api.infiot.net/v2/gateways returned HTTP 200" in message
+    assert "expected a JSON response but received text/plain" in message
 
 
 def _build_response(

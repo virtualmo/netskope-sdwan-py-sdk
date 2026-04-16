@@ -34,6 +34,34 @@ def test_gateways_manager_list_parses_paginated_envelope() -> None:
     assert gateways[0].managed is True
     assert gateways[1].is_activated is False
     assert client.gateways._last_page_info == fixture["page_info"]
+    assert client.gateways.last_page_info == fixture["page_info"]
+    assert client.gateways.last_cursors is None
+
+
+def test_gateways_manager_list_forwards_standard_query_params() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = gateway_list_response_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == GATEWAYS_PATH
+        assert params == {
+            "after": "cursor-1",
+            "first": 50,
+            "sort": "name",
+            "filter": "name: Branch",
+        }
+        return fixture
+
+    client.transport.get = fake_get
+
+    gateways = client.gateways.list(
+        after="cursor-1",
+        first=50,
+        sort="name",
+        filter="name: Branch",
+    )
+
+    assert [item.id for item in gateways] == ["gw-001", "gw-002"]
 
 
 def test_gateways_manager_list_fails_when_list_field_is_missing() -> None:

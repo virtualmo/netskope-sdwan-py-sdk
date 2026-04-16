@@ -59,7 +59,7 @@ class Transport:
         try:
             return response.json()
         except ValueError as exc:
-            raise APIResponseError("The API returned a non-JSON response.") from exc
+            raise APIResponseError(_build_non_json_response_message(response)) from exc
 
     def get(self, path: str, *, params: dict[str, Any] | None = None) -> Any:
         return self.request("GET", path, params=params)
@@ -151,6 +151,18 @@ def _build_error_message(response: requests.Response) -> str:
         extras.append(f"request_id={request_id}")
     suffix = f" ({', '.join(extras)})" if extras else ""
     return f"{method} {url} returned HTTP {response.status_code}: {detail}{suffix}"
+
+
+def _build_non_json_response_message(response: requests.Response) -> str:
+    request = response.request
+    method = request.method if request is not None else "UNKNOWN"
+    url = request.url if request is not None else response.url or "unknown URL"
+    status = response.status_code or "unknown"
+    content_type = response.headers.get("Content-Type", "unknown")
+    return (
+        f"{method} {url} returned HTTP {status}: expected a JSON response but received "
+        f"{content_type}."
+    )
 
 
 def _extract_filename(content_disposition: str | None) -> str | None:

@@ -52,6 +52,7 @@ def test_device_groups_list_parses_paginated_envelope() -> None:
 
     def fake_get(path: str, *, params=None):
         assert path == "/v2/device-groups"
+        assert params is None
         return fixture
 
     client.transport.get = fake_get
@@ -61,6 +62,8 @@ def test_device_groups_list_parses_paginated_envelope() -> None:
     assert [item.id for item in items] == ["res-001", "res-002"]
     assert items[0].name == "Resource One"
     assert items[1].raw == fixture["data"][1]
+    assert client.device_groups.last_page_info == fixture["page_info"]
+    assert client.device_groups.last_cursors is None
 
 
 def test_address_groups_list_and_get_parse_resource_payloads() -> None:
@@ -97,6 +100,34 @@ def test_address_groups_list_address_objects_parses_nested_resource_list() -> No
     items = client.address_groups.list_address_objects("ag-001")
 
     assert [entry.id for entry in items] == ["res-001", "res-002"]
+
+
+def test_address_groups_list_address_objects_forwards_query_params() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = resource_envelope_list_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/v2/address-groups/ag-001/address-objects"
+        assert params == {
+            "after": "cursor-1",
+            "first": 25,
+            "sort": "name",
+            "filter": "name: Branch",
+        }
+        return fixture
+
+    client.transport.get = fake_get
+
+    items = client.address_groups.list_address_objects(
+        "ag-001",
+        after="cursor-1",
+        first=25,
+        sort="name",
+        filter="name: Branch",
+    )
+
+    assert [entry.id for entry in items] == ["res-001", "res-002"]
+    assert client.address_groups.last_page_info == fixture["page_info"]
 
 
 def test_policies_list_parses_top_level_array() -> None:
@@ -226,6 +257,36 @@ def test_audit_events_list_includes_optional_filters() -> None:
     assert [item.id for item in items] == ["res-001", "res-002"]
 
 
+def test_audit_events_list_supports_standard_list_query_params() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = resource_envelope_list_fixture()
+
+    def fake_get(path: str, *, params=None):
+        assert path == "/v2/auditevents"
+        assert params == {
+            "after": "cursor-2",
+            "first": 10,
+            "sort": "-created_at",
+            "filter": 'created_at>="2024-12-01T00:00:00Z" AND '
+            'created_at<="2024-12-02T00:00:00Z" AND tenant_id: tenant-001',
+        }
+        return fixture
+
+    client.transport.get = fake_get
+
+    items = client.audit_events.list(
+        created_at_from="2024-12-01T00:00:00Z",
+        created_at_to="2024-12-02T00:00:00Z",
+        after="cursor-2",
+        first=10,
+        sort="-created_at",
+        filter="tenant_id: tenant-001",
+    )
+
+    assert [item.id for item in items] == ["res-001", "res-002"]
+    assert client.audit_events.last_page_info == fixture["page_info"]
+
+
 def test_audit_events_list_requires_created_at_from() -> None:
     client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
 
@@ -235,7 +296,8 @@ def test_audit_events_list_requires_created_at_from() -> None:
             created_at_to="2025-01-10T23:59:59-05:00",
         )
 
-    assert "requires created_at_from" in str(excinfo.value)
+    assert "requires a bounded time range" in str(excinfo.value)
+    assert "created_at_from" in str(excinfo.value)
 
 
 def test_audit_events_list_requires_created_at_to() -> None:
@@ -247,7 +309,8 @@ def test_audit_events_list_requires_created_at_to() -> None:
             created_at_to="",
         )
 
-    assert "requires created_at_to" in str(excinfo.value)
+    assert "requires a bounded time range" in str(excinfo.value)
+    assert "created_at_to" in str(excinfo.value)
 
 
 def test_audit_events_list_fails_on_malformed_payload() -> None:

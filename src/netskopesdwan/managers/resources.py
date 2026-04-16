@@ -18,18 +18,47 @@ class ReadOnlyResourceManager(BaseManager):
         super().__init__(transport)
         self.resource_path = resource_path
         self.resource_label = resource_label
+        self._last_page_info: dict[str, Any] | None = None
+        self._last_cursors: dict[str, Any] | None = None
 
-    def list(self) -> list[ResourceRecord]:
-        payload = self._get()
-        return _parse_resource_list_response(
+    @property
+    def last_page_info(self) -> dict[str, Any] | None:
+        return self._last_page_info
+
+    @property
+    def last_cursors(self) -> dict[str, Any] | None:
+        return self._last_cursors
+
+    def list(
+        self,
+        *,
+        after: str | None = None,
+        first: int | None = None,
+        sort: str | None = None,
+        filter: str | None = None,
+    ) -> list[ResourceRecord]:
+        params = _build_list_params(after=after, first=first, sort=sort, filter=filter)
+        payload = self._get(params=params)
+        items, page_info, cursors = _parse_resource_list_response(
             payload,
             resource_label=self.resource_label,
             list_field_candidates=self.list_field_candidates,
         )
+        self._store_pagination_state(page_info=page_info, cursors=cursors)
+        return items
 
     def get(self, resource_id: str) -> ResourceRecord:
         payload = self._get(resource_id)
         return _parse_resource_detail_response(payload, resource_label=self.resource_label)
+
+    def _store_pagination_state(
+        self,
+        *,
+        page_info: dict[str, Any] | None,
+        cursors: dict[str, Any] | None,
+    ) -> None:
+        self._last_page_info = dict(page_info) if page_info is not None else None
+        self._last_cursors = dict(cursors) if cursors is not None else None
 
 
 class InventoryDeviceManager(ReadOnlyResourceManager):
@@ -49,7 +78,11 @@ class InventoryDeviceManager(ReadOnlyResourceManager):
 
 class AuditEventManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/auditevents", resource_label="audit event")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/auditevents",
+            resource_label="audit event",
+        )
 
     def list(
         self,
@@ -59,11 +92,22 @@ class AuditEventManager(ReadOnlyResourceManager):
         type: str | None = None,
         subtype: str | None = None,
         activity: str | None = None,
+        after: str | None = None,
+        first: int | None = None,
+        sort: str | None = None,
+        filter: str | None = None,
     ) -> list[ResourceRecord]:
+        missing_filters = []
         if not created_at_from:
-            raise ValidationError("audit_events.list(...) requires created_at_from.")
+            missing_filters.append("created_at_from")
         if not created_at_to:
-            raise ValidationError("audit_events.list(...) requires created_at_to.")
+            missing_filters.append("created_at_to")
+        if missing_filters:
+            raise ValidationError(
+                "audit_events.list(...) requires a bounded time range with "
+                + ", ".join(missing_filters)
+                + "."
+            )
 
         filter_expression = _build_audit_event_filter(
             created_at_from=created_at_from,
@@ -71,13 +115,22 @@ class AuditEventManager(ReadOnlyResourceManager):
             type=type,
             subtype=subtype,
             activity=activity,
+            raw_filter=filter,
         )
-        payload = self._get(params={"filter": filter_expression})
-        return _parse_resource_list_response(
+        params = _build_list_params(
+            after=after,
+            first=first,
+            sort=sort,
+            filter=filter_expression,
+        )
+        payload = self._get(params=params)
+        items, page_info, cursors = _parse_resource_list_response(
             payload,
             resource_label=self.resource_label,
             list_field_candidates=self.list_field_candidates,
         )
+        self._store_pagination_state(page_info=page_info, cursors=cursors)
+        return items
 
     def get(self, resource_id: str) -> ResourceRecord:
         raise AttributeError(
@@ -88,20 +141,42 @@ class AuditEventManager(ReadOnlyResourceManager):
 
 class AddressGroupManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/address-groups", resource_label="address group")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/address-groups",
+            resource_label="address group",
+        )
 
-    def list_address_objects(self, group_id: str) -> list[ResourceRecord]:
-        payload = self._get(f"{API_V2_PREFIX}/address-groups/{group_id}/address-objects")
-        return _parse_resource_list_response(
+    def list_address_objects(
+        self,
+        group_id: str,
+        *,
+        after: str | None = None,
+        first: int | None = None,
+        sort: str | None = None,
+        filter: str | None = None,
+    ) -> list[ResourceRecord]:
+        params = _build_list_params(after=after, first=first, sort=sort, filter=filter)
+        payload = self._get(
+            f"{API_V2_PREFIX}/address-groups/{group_id}/address-objects",
+            params=params,
+        )
+        items, page_info, cursors = _parse_resource_list_response(
             payload,
             resource_label="address object",
             list_field_candidates=self.list_field_candidates,
         )
+        self._store_pagination_state(page_info=page_info, cursors=cursors)
+        return items
 
 
 class DeviceGroupManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/device-groups", resource_label="device group")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/device-groups",
+            resource_label="device group",
+        )
 
 
 class ClientTemplateManager(ReadOnlyResourceManager):
@@ -115,47 +190,102 @@ class ClientTemplateManager(ReadOnlyResourceManager):
 
 class ClientManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/clients", resource_label="client")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/clients",
+            resource_label="client",
+        )
 
 
 class CloudAccountManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/cloud-accounts", resource_label="cloud account")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/cloud-accounts",
+            resource_label="cloud account",
+        )
 
 
 class ApplicationManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/custom-apps", resource_label="custom app")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/custom-apps",
+            resource_label="custom app",
+        )
 
-    def list_categories(self) -> list[ResourceRecord]:
-        payload = self._get(f"{API_V2_PREFIX}/app-categories")
-        return _parse_resource_list_response(
+    def list_categories(
+        self,
+        *,
+        after: str | None = None,
+        first: int | None = None,
+        sort: str | None = None,
+        filter: str | None = None,
+    ) -> list[ResourceRecord]:
+        params = _build_list_params(after=after, first=first, sort=sort, filter=filter)
+        payload = self._get(f"{API_V2_PREFIX}/app-categories", params=params)
+        items, page_info, cursors = _parse_resource_list_response(
             payload,
             resource_label="app category",
             list_field_candidates=self.list_field_candidates,
         )
+        self._store_pagination_state(page_info=page_info, cursors=cursors)
+        return items
 
-    def list_custom_apps(self) -> list[ResourceRecord]:
-        return self.list()
+    def list_custom_apps(
+        self,
+        *,
+        after: str | None = None,
+        first: int | None = None,
+        sort: str | None = None,
+        filter: str | None = None,
+    ) -> list[ResourceRecord]:
+        return self.list(after=after, first=first, sort=sort, filter=filter)
 
     def get_custom_app(self, resource_id: str) -> ResourceRecord:
         return self.get(resource_id)
 
-    def list_qosmos_apps(self) -> list[ResourceRecord]:
-        payload = self._get(f"{API_V2_PREFIX}/qosmos-apps")
-        return _parse_resource_list_response(
+    def list_qosmos_apps(
+        self,
+        *,
+        after: str | None = None,
+        first: int | None = None,
+        sort: str | None = None,
+        filter: str | None = None,
+    ) -> list[ResourceRecord]:
+        params = _build_list_params(after=after, first=first, sort=sort, filter=filter)
+        payload = self._get(
+            f"{API_V2_PREFIX}/qosmos-apps",
+            params=params,
+        )
+        items, page_info, cursors = _parse_resource_list_response(
             payload,
             resource_label="qosmos app",
             list_field_candidates=self.list_field_candidates,
         )
+        self._store_pagination_state(page_info=page_info, cursors=cursors)
+        return items
 
-    def list_webroot_categories(self) -> list[ResourceRecord]:
-        payload = self._get(f"{API_V2_PREFIX}/webroot-categories")
-        return _parse_resource_list_response(
+    def list_webroot_categories(
+        self,
+        *,
+        after: str | None = None,
+        first: int | None = None,
+        sort: str | None = None,
+        filter: str | None = None,
+    ) -> list[ResourceRecord]:
+        params = _build_list_params(after=after, first=first, sort=sort, filter=filter)
+        payload = self._get(
+            f"{API_V2_PREFIX}/webroot-categories",
+            params=params,
+        )
+        items, page_info, cursors = _parse_resource_list_response(
             payload,
             resource_label="webroot category",
             list_field_candidates=self.list_field_candidates,
         )
+        self._store_pagination_state(page_info=page_info, cursors=cursors)
+        return items
 
 
 class CACertificateManager(ReadOnlyResourceManager):
@@ -178,7 +308,11 @@ class ControllerOperatorManager(ReadOnlyResourceManager):
 
 class ControllerManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/controllers", resource_label="controller")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/controllers",
+            resource_label="controller",
+        )
 
     def get_operator_status(self, controller_id: str) -> dict[str, Any]:
         payload = self._get(f"{API_V2_PREFIX}/controllers/{controller_id}/operator_status")
@@ -187,7 +321,11 @@ class ControllerManager(ReadOnlyResourceManager):
 
 class GatewayGroupManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/gateway-groups", resource_label="gateway group")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/gateway-groups",
+            resource_label="gateway group",
+        )
 
 
 class GatewayTemplateManager(ReadOnlyResourceManager):
@@ -201,35 +339,61 @@ class GatewayTemplateManager(ReadOnlyResourceManager):
 
 class NTPConfigManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/ntp-configs", resource_label="ntp config")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/ntp-configs",
+            resource_label="ntp config",
+        )
 
 
 class OverlayTagManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/overlay-tags", resource_label="overlay tag")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/overlay-tags",
+            resource_label="overlay tag",
+        )
 
 
 class SegmentManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/segments", resource_label="segment")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/segments",
+            resource_label="segment",
+        )
 
 
 class VPNPeerManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/vpnpeers", resource_label="vpn peer")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/vpnpeers",
+            resource_label="vpn peer",
+        )
 
 
 class PolicyManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/policies", resource_label="policy")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/policies",
+            resource_label="policy",
+        )
 
 
 class SiteCommandManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/site-commands", resource_label="site command")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/site-commands",
+            resource_label="site command",
+        )
 
     def get_output(self, command_id: str, name: str) -> DownloadResult:
-        return self._transport.get_download(f"{API_V2_PREFIX}/site-command/{command_id}/output/{name}")
+        return self._transport.get_download(
+            f"{API_V2_PREFIX}/site-command/{command_id}/output/{name}"
+        )
 
 
 class SoftwareManager(ReadOnlyResourceManager):
@@ -240,16 +404,36 @@ class SoftwareManager(ReadOnlyResourceManager):
             resource_label="software version",
         )
 
-    def list_downloads(self) -> list[ResourceRecord]:
-        payload = self._get(f"{API_V2_PREFIX}/software-downloads")
-        return _parse_resource_list_response(
+    def list_downloads(
+        self,
+        *,
+        after: str | None = None,
+        first: int | None = None,
+        sort: str | None = None,
+        filter: str | None = None,
+    ) -> list[ResourceRecord]:
+        params = _build_list_params(after=after, first=first, sort=sort, filter=filter)
+        payload = self._get(
+            f"{API_V2_PREFIX}/software-downloads",
+            params=params,
+        )
+        items, page_info, cursors = _parse_resource_list_response(
             payload,
             resource_label="software download",
             list_field_candidates=self.list_field_candidates,
         )
+        self._store_pagination_state(page_info=page_info, cursors=cursors)
+        return items
 
-    def list_versions(self) -> list[ResourceRecord]:
-        return self.list()
+    def list_versions(
+        self,
+        *,
+        after: str | None = None,
+        first: int | None = None,
+        sort: str | None = None,
+        filter: str | None = None,
+    ) -> list[ResourceRecord]:
+        return self.list(after=after, first=first, sort=sort, filter=filter)
 
     def get(self, resource_id: str) -> ResourceRecord:
         raise AttributeError(
@@ -260,17 +444,29 @@ class SoftwareManager(ReadOnlyResourceManager):
 
 class TenantManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/tenants", resource_label="tenant")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/tenants",
+            resource_label="tenant",
+        )
 
 
 class UserGroupManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/user-groups", resource_label="user group")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/user-groups",
+            resource_label="user group",
+        )
 
 
 class UserManager(ReadOnlyResourceManager):
     def __init__(self, transport) -> None:
-        super().__init__(transport, resource_path=f"{API_V2_PREFIX}/users", resource_label="user")
+        super().__init__(
+            transport,
+            resource_path=f"{API_V2_PREFIX}/users",
+            resource_label="user",
+        )
 
 
 class RadiusServerManager(ReadOnlyResourceManager):
@@ -295,14 +491,41 @@ def _parse_resource_list_response(
     *,
     resource_label: str,
     list_field_candidates: tuple[str, ...],
-) -> list[ResourceRecord]:
+) -> tuple[list[ResourceRecord], dict[str, Any] | None, dict[str, Any] | None]:
+    return _parse_list_response(
+        payload,
+        resource_label=resource_label,
+        list_field_candidates=list_field_candidates,
+        item_adapter=_adapt_resource,
+    )
+
+
+def _parse_list_response(
+    payload: Any,
+    *,
+    resource_label: str,
+    list_field_candidates: tuple[str, ...],
+    item_adapter,
+) -> tuple[list[Any], dict[str, Any] | None, dict[str, Any] | None]:
     if isinstance(payload, list):
-        return [_adapt_resource(item, resource_label=resource_label) for item in payload]
+        items = [item_adapter(item, resource_label=resource_label) for item in payload]
+        return items, None, None
 
     if not isinstance(payload, dict):
         raise APIResponseError(
             f"{_label(resource_label)} list response must be a top-level JSON array or object."
         )
+
+    page_info = _parse_optional_metadata_object(
+        payload,
+        field_name="page_info",
+        resource_label=resource_label,
+    )
+    cursors = _parse_optional_metadata_object(
+        payload,
+        field_name="cursors",
+        resource_label=resource_label,
+    )
 
     list_field_name = next((name for name in list_field_candidates if name in payload), None)
     if list_field_name is None:
@@ -315,15 +538,18 @@ def _parse_resource_list_response(
     items = payload[list_field_name]
     if not isinstance(items, list):
         raise APIResponseError(
-            f"{_label(resource_label)} list response field '{list_field_name}' must be a JSON array."
+            f"{_label(resource_label)} list response field "
+            f"'{list_field_name}' must be a JSON array."
         )
 
-    return [_adapt_resource(item, resource_label=resource_label) for item in items]
+    return [item_adapter(item, resource_label=resource_label) for item in items], page_info, cursors
 
 
 def _parse_resource_detail_response(payload: Any, *, resource_label: str) -> ResourceRecord:
     if not isinstance(payload, dict):
-        raise APIResponseError(f"{_label(resource_label)} detail response must be a top-level JSON object.")
+        raise APIResponseError(
+            f"{_label(resource_label)} detail response must be a top-level JSON object."
+        )
     resource = _adapt_resource(payload, resource_label=resource_label)
     if not resource.id:
         raise APIResponseError(
@@ -334,13 +560,17 @@ def _parse_resource_detail_response(payload: Any, *, resource_label: str) -> Res
 
 def _adapt_resource(payload: Any, *, resource_label: str) -> ResourceRecord:
     if not isinstance(payload, dict):
-        raise APIResponseError(f"{_label(resource_label)} payload items must be JSON objects.")
+        raise APIResponseError(
+            f"{_label(resource_label)} payload items must be JSON objects."
+        )
     return ResourceRecord.from_dict(payload)
 
 
 def _parse_raw_object_response(payload: Any, *, resource_label: str) -> dict[str, Any]:
     if not isinstance(payload, dict):
-        raise APIResponseError(f"{_label(resource_label)} response must be a top-level JSON object.")
+        raise APIResponseError(
+            f"{_label(resource_label)} response must be a top-level JSON object."
+        )
     return payload
 
 
@@ -351,6 +581,7 @@ def _build_audit_event_filter(
     type: str | None,
     subtype: str | None,
     activity: str | None,
+    raw_filter: str | None,
 ) -> str:
     parts = [
         f'created_at>="{created_at_from}"',
@@ -362,7 +593,44 @@ def _build_audit_event_filter(
         parts.append(f"subtype: {subtype}")
     if activity:
         parts.append(f"activity: {activity}")
+    if raw_filter:
+        parts.append(raw_filter)
     return " AND ".join(parts)
+
+
+def _build_list_params(
+    *,
+    after: str | None = None,
+    first: int | None = None,
+    sort: str | None = None,
+    filter: str | None = None,
+) -> dict[str, Any] | None:
+    params: dict[str, Any] = {}
+    if after:
+        params["after"] = after
+    if first is not None:
+        params["first"] = first
+    if sort:
+        params["sort"] = sort
+    if filter:
+        params["filter"] = filter
+    return params or None
+
+
+def _parse_optional_metadata_object(
+    payload: dict[str, Any],
+    *,
+    field_name: str,
+    resource_label: str,
+) -> dict[str, Any] | None:
+    value = payload.get(field_name)
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise APIResponseError(
+            f"{_label(resource_label)} list response field '{field_name}' must be a JSON object."
+        )
+    return value
 
 
 def _label(value: str) -> str:
