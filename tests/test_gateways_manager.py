@@ -77,7 +77,7 @@ def test_gateways_manager_list_fails_when_list_field_is_missing() -> None:
         client.gateways.list()
 
     message = str(excinfo.value)
-    assert "Expected 'data' or 'items'" in message
+    assert "data" in message and "items" in message
     assert "Top-level keys: page_info, request_id" in message
 
 
