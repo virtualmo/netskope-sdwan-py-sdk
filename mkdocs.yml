@@ -1,0 +1,28 @@
+site_name: netskope-sdwan-py-sdk
+site_description: Read-only Python SDK for Netskope SD-WAN APIs
+repo_url: https://github.com/ns-melamin/netskope-sdwan-py-sdk
+repo_name: ns-melamin/netskope-sdwan-py-sdk
+theme:
+  name: material
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Authentication: authentication.md
+  - Examples: examples.md
+  - API Reference:
+      - SDWANClient: api/sdwanclient.md
+      - GatewayManager: api/gateway-manager.md
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_root_heading: true
+            show_source: false
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true

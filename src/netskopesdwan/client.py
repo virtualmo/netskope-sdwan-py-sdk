@@ -35,6 +35,13 @@ from .v1 import LegacyV1Namespace
 
 
 class SDWANClient:
+    """Entry point for the Netskope SD-WAN SDK.
+
+    The client loads configuration from constructor arguments or environment variables,
+    resolves the effective API base URL, and exposes supported resource managers as
+    attributes such as `gateways`, `users`, and `v1.monitoring`.
+    """
+
     def __init__(
         self,
         *,
@@ -45,6 +52,16 @@ class SDWANClient:
         timeout: float | int | None = None,
         verify_ssl: bool = True,
     ) -> None:
+        """Initialize a read-only SDK client.
+
+        Args:
+            tenant_url: Optional goskope tenant URL used for supported tenant resolution flows.
+            base_url: Direct SD-WAN API base URL such as `https://tenant.api.eu.infiot.net`.
+            sdwan_tenant_name: Optional SD-WAN tenant name used with supported goskope inputs.
+            api_token: API bearer token.
+            timeout: Optional requests timeout in seconds.
+            verify_ssl: Whether to verify TLS certificates for outgoing requests.
+        """
         self._settings: ClientSettings = load_settings(
             base_url=base_url,
             tenant_url=tenant_url,

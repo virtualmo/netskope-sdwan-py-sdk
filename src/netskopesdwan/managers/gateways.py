@@ -15,6 +15,8 @@ GATEWAY_TELEMETRY_OVERVIEW_PATH = "/v2/gateways/{id}/telemetry/overview"
 
 
 class GatewayManager(BaseManager):
+    """Read-only manager for `/v2/gateways` endpoints."""
+
     resource_path = GATEWAYS_PATH
 
     def __init__(self, transport) -> None:
@@ -38,6 +40,14 @@ class GatewayManager(BaseManager):
         sort: str | None = None,
         filter: str | None = None,
     ) -> list[Gateway]:
+        """List gateways.
+
+        Args:
+            after: Cursor used for forward pagination.
+            first: Maximum number of items to return.
+            sort: Raw backend sort expression.
+            filter: Raw backend filter expression such as `status:up`.
+        """
         params = _build_list_params(after=after, first=first, sort=sort, filter=filter)
         payload = self._get(params=params)
         gateways, page_info, cursors = _parse_gateway_list_response(payload)
@@ -46,18 +56,22 @@ class GatewayManager(BaseManager):
         return gateways
 
     def get(self, gateway_id: str) -> Gateway:
+        """Fetch one gateway by ID."""
         payload = self._get(GATEWAY_BY_ID_PATH.format(id=gateway_id))
         return _parse_gateway_object_response(payload)
 
     def get_localui_password(self, gateway_id: str) -> dict[str, Any]:
+        """Fetch the local UI password payload for a gateway."""
         payload = self._get(GATEWAY_LOCALUI_PASSWORD_PATH.format(id=gateway_id))
         return _parse_gateway_password_response(payload, password_type="local UI password")
 
     def get_ssh_password(self, gateway_id: str) -> dict[str, Any]:
+        """Fetch the SSH password payload for a gateway."""
         payload = self._get(GATEWAY_SSH_PASSWORD_PATH.format(id=gateway_id))
         return _parse_gateway_password_response(payload, password_type="SSH password")
 
     def get_telemetry_overview(self, gateway_id: str) -> dict[str, Any]:
+        """Fetch the raw telemetry overview payload for a gateway."""
         payload = self._get(GATEWAY_TELEMETRY_OVERVIEW_PATH.format(id=gateway_id))
         return _parse_gateway_telemetry_response(payload)
 
