@@ -37,6 +37,8 @@ _REGION_TO_API_SUFFIX = {
 
 @dataclass(slots=True)
 class ResolutionResult:
+    """Result of resolving a tenant input into a concrete SD-WAN API base URL."""
+
     input_host: str
     input_type: str
     goskope_tenant_name: str | None
@@ -48,6 +50,7 @@ class ResolutionResult:
     confidence: str
 
     def to_metadata(self) -> dict[str, str | None]:
+        """Return the resolution result as a plain metadata dictionary."""
         return asdict(self)
 
 
@@ -57,6 +60,7 @@ def resolve_api_base_url(
     tenant_url: str | None,
     sdwan_tenant_name: str | None,
 ) -> ResolutionResult:
+    """Resolve a direct base URL or supported tenant URL into an API endpoint."""
     if base_url and tenant_url:
         base_result = _resolve_single_input(
             raw_value=base_url,
@@ -88,6 +92,7 @@ def resolve_api_base_url(
 
 
 def normalize_url(value: str) -> str:
+    """Normalize a tenant or API host into an HTTPS URL string."""
     host = _extract_host(value)
     if _is_infiot_host(host):
         return f"https://{_normalize_infiot_host(host)}"

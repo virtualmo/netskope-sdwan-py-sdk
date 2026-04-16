@@ -11,6 +11,8 @@ API_V2_PREFIX = "/v2"
 
 
 class ReadOnlyResourceManager(BaseManager):
+    """Base manager for simple v2 list/get resources that share a common response shape."""
+
     resource_label = "resource"
     list_field_candidates = ("data", "items")
 
@@ -62,6 +64,8 @@ class ReadOnlyResourceManager(BaseManager):
 
 
 class InventoryDeviceManager(ReadOnlyResourceManager):
+    """Manager for `/v2/inventory-devices` list operations."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -77,6 +81,8 @@ class InventoryDeviceManager(ReadOnlyResourceManager):
 
 
 class AuditEventManager(ReadOnlyResourceManager):
+    """Manager for `/v2/auditevents` with required bounded time filters."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -140,6 +146,8 @@ class AuditEventManager(ReadOnlyResourceManager):
 
 
 class AddressGroupManager(ReadOnlyResourceManager):
+    """Manager for `/v2/address-groups` and nested address object listing."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -171,6 +179,8 @@ class AddressGroupManager(ReadOnlyResourceManager):
 
 
 class DeviceGroupManager(ReadOnlyResourceManager):
+    """Manager for `/v2/device-groups`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -180,6 +190,8 @@ class DeviceGroupManager(ReadOnlyResourceManager):
 
 
 class ClientTemplateManager(ReadOnlyResourceManager):
+    """Manager for `/v2/client-templates`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -189,6 +201,8 @@ class ClientTemplateManager(ReadOnlyResourceManager):
 
 
 class ClientManager(ReadOnlyResourceManager):
+    """Manager for `/v2/clients`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -198,6 +212,8 @@ class ClientManager(ReadOnlyResourceManager):
 
 
 class CloudAccountManager(ReadOnlyResourceManager):
+    """Manager for `/v2/cloud-accounts`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -207,6 +223,8 @@ class CloudAccountManager(ReadOnlyResourceManager):
 
 
 class ApplicationManager(ReadOnlyResourceManager):
+    """Manager for application-related read-only endpoints."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -289,6 +307,8 @@ class ApplicationManager(ReadOnlyResourceManager):
 
 
 class CACertificateManager(ReadOnlyResourceManager):
+    """Manager for `/v2/ca-certificates`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -298,6 +318,8 @@ class CACertificateManager(ReadOnlyResourceManager):
 
 
 class ControllerOperatorManager(ReadOnlyResourceManager):
+    """Manager for `/v2/controller-operators` and related status lookups."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -307,6 +329,8 @@ class ControllerOperatorManager(ReadOnlyResourceManager):
 
 
 class ControllerManager(ReadOnlyResourceManager):
+    """Manager for `/v2/controllers`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -320,6 +344,8 @@ class ControllerManager(ReadOnlyResourceManager):
 
 
 class GatewayGroupManager(ReadOnlyResourceManager):
+    """Manager for `/v2/gateway-groups`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -329,6 +355,8 @@ class GatewayGroupManager(ReadOnlyResourceManager):
 
 
 class GatewayTemplateManager(ReadOnlyResourceManager):
+    """Manager for `/v2/gateway-templates`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -338,6 +366,8 @@ class GatewayTemplateManager(ReadOnlyResourceManager):
 
 
 class NTPConfigManager(ReadOnlyResourceManager):
+    """Manager for `/v2/ntp-configs`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -347,6 +377,8 @@ class NTPConfigManager(ReadOnlyResourceManager):
 
 
 class OverlayTagManager(ReadOnlyResourceManager):
+    """Manager for `/v2/overlay-tags`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -356,6 +388,8 @@ class OverlayTagManager(ReadOnlyResourceManager):
 
 
 class SegmentManager(ReadOnlyResourceManager):
+    """Manager for `/v2/segments`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -365,6 +399,8 @@ class SegmentManager(ReadOnlyResourceManager):
 
 
 class VPNPeerManager(ReadOnlyResourceManager):
+    """Manager for `/v2/vpnpeers`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -374,6 +410,8 @@ class VPNPeerManager(ReadOnlyResourceManager):
 
 
 class PolicyManager(ReadOnlyResourceManager):
+    """Manager for `/v2/policies`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -383,6 +421,8 @@ class PolicyManager(ReadOnlyResourceManager):
 
 
 class SiteCommandManager(ReadOnlyResourceManager):
+    """Manager for `/v2/site-command` and command output downloads."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -397,6 +437,8 @@ class SiteCommandManager(ReadOnlyResourceManager):
 
 
 class SoftwareManager(ReadOnlyResourceManager):
+    """Manager for software metadata and binary download endpoints."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -443,6 +485,8 @@ class SoftwareManager(ReadOnlyResourceManager):
 
 
 class TenantManager(ReadOnlyResourceManager):
+    """Manager for `/v2/tenants`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -452,6 +496,8 @@ class TenantManager(ReadOnlyResourceManager):
 
 
 class UserGroupManager(ReadOnlyResourceManager):
+    """Manager for `/v2/user-groups`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -461,6 +507,8 @@ class UserGroupManager(ReadOnlyResourceManager):
 
 
 class UserManager(ReadOnlyResourceManager):
+    """Manager for `/v2/users`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -470,6 +518,8 @@ class UserManager(ReadOnlyResourceManager):
 
 
 class RadiusServerManager(ReadOnlyResourceManager):
+    """Manager for `/v2/radius-servers`."""
+
     def __init__(self, transport) -> None:
         super().__init__(
             transport,
@@ -479,6 +529,8 @@ class RadiusServerManager(ReadOnlyResourceManager):
 
 
 class JWKSManager(BaseManager):
+    """Manager for controller JWKS retrieval endpoints."""
+
     resource_path = f"{API_V2_PREFIX}/jwks.json"
 
     def get(self) -> dict[str, Any]:

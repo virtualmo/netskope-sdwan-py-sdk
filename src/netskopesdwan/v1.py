@@ -20,6 +20,8 @@ class LegacyV1Namespace:
 
 
 class V1EdgeManager(BaseManager):
+    """Legacy v1 edge and interface GET helpers."""
+
     resource_path = "/edges"
 
     def __init__(self, transport: Transport) -> None:
@@ -120,6 +122,8 @@ class V1EdgeManager(BaseManager):
 
 
 class V1MonitoringManager(BaseManager):
+    """Legacy v1 monitoring GET helpers that return raw API payloads."""
+
     def get_device_flows_totals(
         self,
         gateway_id: str,
@@ -337,6 +341,8 @@ class V1MonitoringManager(BaseManager):
 
 
 class V1UserManager(BaseManager):
+    """Legacy v1 user-related GET helpers."""
+
     def get_groups(
         self,
         user_id: str,

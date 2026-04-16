@@ -13,6 +13,8 @@ ENV_TIMEOUT = "NETSKOPESDWAN_TIMEOUT"
 
 @dataclass(slots=True)
 class ClientSettings:
+    """Normalized client configuration after constructor and environment resolution."""
+
     base_url: str | None
     tenant_url: str | None
     api_token: str
@@ -30,6 +32,7 @@ def load_settings(
     verify_ssl: bool,
     sdwan_tenant_name: str | None,
 ) -> ClientSettings:
+    """Resolve client settings from explicit arguments and supported environment variables."""
     resolved_base_url = base_url if base_url is not None else _read_env(ENV_BASE_URL)
     resolved_tenant_url = tenant_url if tenant_url is not None else _read_env(ENV_TENANT_URL)
     resolved_api_token = api_token if api_token is not None else _read_env(ENV_API_TOKEN)

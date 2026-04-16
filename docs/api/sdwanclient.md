@@ -1,3 +1,0 @@
-# SDWANClient
-
-::: netskopesdwan.client.SDWANClient

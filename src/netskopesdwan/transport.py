@@ -16,6 +16,8 @@ from .models.download import DownloadResult
 
 
 class Transport:
+    """Thin synchronous HTTP transport used by the SDK managers."""
+
     def __init__(
         self,
         *,
@@ -62,9 +64,11 @@ class Transport:
             raise APIResponseError(_build_non_json_response_message(response)) from exc
 
     def get(self, path: str, *, params: dict[str, Any] | None = None) -> Any:
+        """Perform a GET request and decode a JSON response."""
         return self.request("GET", path, params=params)
 
     def get_text(self, path: str, *, params: dict[str, Any] | None = None) -> str:
+        """Perform a GET request and return the raw text body."""
         response = self.session.request(
             method="GET",
             url=f"{self.base_url}/{path.lstrip('/')}",
@@ -76,6 +80,7 @@ class Transport:
         return response.text
 
     def get_download(self, path: str, *, params: dict[str, Any] | None = None) -> DownloadResult:
+        """Perform a GET request and return a binary download payload."""
         response = self.session.request(
             method="GET",
             url=f"{self.base_url}/{path.lstrip('/')}",

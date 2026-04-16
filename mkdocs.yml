@@ -10,8 +10,23 @@ nav:
   - Authentication: authentication.md
   - Examples: examples.md
   - API Reference:
-      - SDWANClient: api/sdwanclient.md
-      - GatewayManager: api/gateway-manager.md
+      - Overview: api/index.md
+      - Package: api/package.md
+      - Client: api/client.md
+      - Config: api/config.md
+      - Enums: api/enums.md
+      - Exceptions: api/exceptions.md
+      - Pagination: api/pagination.md
+      - Tenant Resolution: api/tenant-resolution.md
+      - Transport: api/transport.md
+      - Legacy v1: api/v1.md
+      - Managers: api/managers.md
+      - Gateway Manager Module: api/managers-gateways.md
+      - Resource Manager Module: api/managers-resources.md
+      - Models: api/models.md
+      - Gateway Model: api/models-gateway.md
+      - Resource Model: api/models-resource.md
+      - Download Model: api/models-download.md
 plugins:
   - search
   - mkdocstrings:

@@ -1,0 +1,3 @@
+# Enums Module
+
+::: netskopesdwan.enums

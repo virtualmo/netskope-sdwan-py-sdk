@@ -1,0 +1,3 @@
+# Pagination Module
+
+::: netskopesdwan.pagination

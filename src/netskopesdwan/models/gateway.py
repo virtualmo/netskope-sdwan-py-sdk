@@ -6,6 +6,8 @@ from typing import Any
 
 @dataclass(slots=True)
 class Gateway:
+    """Structured gateway model used by gateway-specific v2 endpoints."""
+
     id: str
     name: str | None = None
     managed: bool | None = None
@@ -17,6 +19,7 @@ class Gateway:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Gateway:
+        """Create a gateway model from a raw API object."""
         return cls(
             id=str(data.get("id") or ""),
             name=_to_optional_str(data.get("name")),
