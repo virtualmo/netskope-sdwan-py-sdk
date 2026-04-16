@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from netskopesdwan import SDWANClient
-from netskopesdwan.exceptions import PermissionDeniedError
+from netskopesdwan.exceptions import NotFoundError, PermissionDeniedError, ValidationError
 from netskopesdwan.models import DownloadResult
 
 
@@ -18,6 +18,7 @@ class SmokeTarget:
     seed_from: str | None = None
     seed_extractor: Any | None = None
     skip_if: Any | None = None
+    exception_classifier: Any | None = None
 
 
 @dataclass
@@ -132,6 +133,26 @@ def require_site_command_output_name() -> str | None:
     if env("NETSKOPESDWAN_SITE_COMMAND_OUTPUT_NAME"):
         return None
     return "set NETSKOPESDWAN_SITE_COMMAND_OUTPUT_NAME to smoke get_output(...)"
+
+
+def classify_site_command_output_exception(exc: Exception) -> SmokeResult | None:
+    if isinstance(exc, NotFoundError):
+        return SmokeResult(
+            "SKIP",
+            "output name not valid for this command result",
+            attempted=True,
+        )
+    return None
+
+
+def classify_optional_monitoring_exception(exc: Exception) -> SmokeResult | None:
+    if isinstance(exc, ValidationError):
+        return SmokeResult(
+            "SKIP",
+            "unsupported for this tenant/gateway/feature set",
+            attempted=True,
+        )
+    return None
 
 
 def build_targets(
@@ -406,6 +427,7 @@ def build_targets(
             seed_from="site_commands.list",
             seed_extractor=extract_first_id,
             skip_if=require_site_command_output_name,
+            exception_classifier=classify_site_command_output_exception,
         ),
         SmokeTarget(
             "software.list_versions",
@@ -514,6 +536,7 @@ def build_targets(
             lambda c, seed: c.v1.monitoring.get_device_flows_totals(seed),
             seed_from="gateways.list",
             seed_extractor=extract_first_id,
+            exception_classifier=classify_optional_monitoring_exception,
         ),
         SmokeTarget(
             "v1.monitoring.get_devices_totals",
@@ -521,6 +544,7 @@ def build_targets(
             lambda c, seed: c.v1.monitoring.get_devices_totals(seed),
             seed_from="gateways.list",
             seed_extractor=extract_first_id,
+            exception_classifier=classify_optional_monitoring_exception,
         ),
         SmokeTarget(
             "v1.monitoring.get_interfaces_latest",
@@ -549,6 +573,7 @@ def build_targets(
             lambda c, seed: c.v1.monitoring.get_system_load(seed),
             seed_from="gateways.list",
             seed_extractor=extract_first_id,
+            exception_classifier=classify_optional_monitoring_exception,
         ),
         SmokeTarget(
             "v1.monitoring.get_system_lte",
@@ -556,6 +581,7 @@ def build_targets(
             lambda c, seed: c.v1.monitoring.get_system_lte(seed),
             seed_from="gateways.list",
             seed_extractor=extract_first_id,
+            exception_classifier=classify_optional_monitoring_exception,
         ),
         SmokeTarget(
             "v1.monitoring.get_system_memory",
@@ -563,6 +589,7 @@ def build_targets(
             lambda c, seed: c.v1.monitoring.get_system_memory(seed),
             seed_from="gateways.list",
             seed_extractor=extract_first_id,
+            exception_classifier=classify_optional_monitoring_exception,
         ),
         SmokeTarget(
             "v1.monitoring.get_system_uptime",
@@ -570,6 +597,7 @@ def build_targets(
             lambda c, seed: c.v1.monitoring.get_system_uptime(seed),
             seed_from="gateways.list",
             seed_extractor=extract_first_id,
+            exception_classifier=classify_optional_monitoring_exception,
         ),
         SmokeTarget(
             "v1.monitoring.get_system_wifi",
@@ -577,6 +605,7 @@ def build_targets(
             lambda c, seed: c.v1.monitoring.get_system_wifi(seed),
             seed_from="gateways.list",
             seed_extractor=extract_first_id,
+            exception_classifier=classify_optional_monitoring_exception,
         ),
         SmokeTarget(
             "v1.monitoring.get_paths_links",
@@ -584,6 +613,7 @@ def build_targets(
             lambda c, seed: c.v1.monitoring.get_paths_links(seed),
             seed_from="gateways.list",
             seed_extractor=extract_first_id,
+            exception_classifier=classify_optional_monitoring_exception,
         ),
         SmokeTarget(
             "v1.monitoring.get_paths_links_totals",
@@ -591,6 +621,7 @@ def build_targets(
             lambda c, seed: c.v1.monitoring.get_paths_links_totals(seed),
             seed_from="gateways.list",
             seed_extractor=extract_first_id,
+            exception_classifier=classify_optional_monitoring_exception,
         ),
         SmokeTarget(
             "v1.users.get_groups",
@@ -676,7 +707,14 @@ def run_target(
     except PermissionDeniedError as exc:
         result = SmokeResult("SKIP", short_error(exc), attempted=True)
     except Exception as exc:
-        result = SmokeResult("FAIL", short_error(exc), attempted=True)
+        if target.exception_classifier is not None:
+            classified = target.exception_classifier(exc)
+            if classified is not None:
+                result = classified
+            else:
+                result = SmokeResult("FAIL", short_error(exc), attempted=True)
+        else:
+            result = SmokeResult("FAIL", short_error(exc), attempted=True)
     else:
         DEPENDENCY_VALUES[target.name] = value
         result = SmokeResult("PASS", summarize(value), attempted=True, value=value)
