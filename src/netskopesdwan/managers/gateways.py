@@ -11,6 +11,7 @@ GATEWAYS_PATH = "/v2/gateways"
 GATEWAY_BY_ID_PATH = "/v2/gateways/{id}"
 GATEWAY_LOCALUI_PASSWORD_PATH = "/v2/gateways/{id}/localui-password"
 GATEWAY_SSH_PASSWORD_PATH = "/v2/gateways/{id}/ssh-password"
+GATEWAY_TELEMETRY_OVERVIEW_PATH = "/v2/gateways/{id}/telemetry/overview"
 
 
 class GatewayManager(BaseManager):
@@ -56,6 +57,10 @@ class GatewayManager(BaseManager):
         payload = self._get(GATEWAY_SSH_PASSWORD_PATH.format(id=gateway_id))
         return _parse_gateway_password_response(payload, password_type="SSH password")
 
+    def get_telemetry_overview(self, gateway_id: str) -> dict[str, Any]:
+        payload = self._get(GATEWAY_TELEMETRY_OVERVIEW_PATH.format(id=gateway_id))
+        return _parse_gateway_telemetry_response(payload)
+
 
 def _parse_gateway_list_response(
     payload: Any,
@@ -88,6 +93,14 @@ def _adapt_gateway(payload: Any, *, resource_label: str = "gateway") -> Gateway:
 def _parse_gateway_password_response(payload: Any, *, password_type: str) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise APIResponseError(f"Gateway {password_type} response must be a top-level JSON object.")
+    return payload
+
+
+def _parse_gateway_telemetry_response(payload: Any) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        raise APIResponseError(
+            "Gateway telemetry overview response must be a top-level JSON object."
+        )
     return payload
 
 

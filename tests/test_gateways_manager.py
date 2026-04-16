@@ -8,6 +8,7 @@ from netskopesdwan.managers.gateways import (
     GATEWAY_BY_ID_PATH,
     GATEWAY_LOCALUI_PASSWORD_PATH,
     GATEWAY_SSH_PASSWORD_PATH,
+    GATEWAY_TELEMETRY_OVERVIEW_PATH,
     GATEWAYS_PATH,
 )
 from netskopesdwan.models.gateway import Gateway
@@ -182,6 +183,26 @@ def test_gateways_manager_get_ssh_password_parses_top_level_object() -> None:
     client.transport.get = fake_get
 
     payload = client.gateways.get_ssh_password("gw-001")
+
+    assert payload == fixture
+
+
+def test_gateways_manager_get_telemetry_overview_parses_top_level_object() -> None:
+    client = SDWANClient(base_url="tenant.api.infiot.net", api_token="TOKEN")
+    fixture = {
+        "software_version": "R6.2.963",
+        "software_upgraded_at": "2026-04-08T04:20:35Z",
+        "links_avg_score": 91.55,
+        "status_v2": {"status": "UP", "conditions": []},
+    }
+
+    def fake_get(path: str, *, params=None):
+        assert path == GATEWAY_TELEMETRY_OVERVIEW_PATH.format(id="gw-001")
+        return fixture
+
+    client.transport.get = fake_get
+
+    payload = client.gateways.get_telemetry_overview("gw-001")
 
     assert payload == fixture
 
