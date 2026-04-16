@@ -1,13 +1,41 @@
 # netskope-sdwan-py-sdk
 
+> ⚠️ Unofficial SDK – community maintained
 `netskope-sdwan-py-sdk` is a read-only Python SDK for Netskope SD-WAN APIs.
 
-It is designed as:
+## Design Principles
 
-- GET only
-- v2-first for the primary client surface
-- explicit about legacy v1-only GET endpoints under `client.v1.*`
-- lightweight in modeling, with a structured `Gateway` model and shallow records elsewhere
+This SDK is intentionally opinionated and focused. It is designed as:
+
+- **GET-only (initial phase)**  
+  The SDK currently provides read-only access to the Netskope SD-WAN APIs.  
+  This is a deliberate first stage to establish a stable, predictable foundation before introducing mutation operations (POST, PUT, PATCH, DELETE).
+
+- **v2-first client surface**  
+  All primary functionality is built around the Netskope SD-WAN v2 API.  
+  New features and coverage are added to v2 managers first, making it the default and recommended interface.
+
+- **Explicit handling of legacy v1 endpoints**  
+  Endpoints that only exist in Netskope SD-WAN v1 are clearly separated under `client.v1.*`.  
+  This avoids ambiguity, keeps the main client clean, and makes it obvious when legacy APIs are being used.
+
+- **Lightweight and pragmatic data modeling**  
+  The SDK avoids heavy abstractions and complex object hierarchies.  
+  A structured `Gateway` model is provided for high-value resources, while most other endpoints return shallow `ResourceRecord` objects with direct access to the raw API payload.
+
+- **Close-to-API behavior**  
+  The SDK mirrors the API closely, with minimal transformation or hidden logic.  
+  This makes it easier to reason about requests, debug issues, and map directly to API documentation.
+
+- **Explicit over implicit**  
+  Parameters, filters, and required fields are intentionally not hidden behind convenience layers.  
+  The goal is to make API interactions transparent rather than “magic”.
+
+- **Composable and script-friendly**  
+  Designed for engineers automating workflows, building tooling, or running diagnostics — not as a full abstraction layer.
+
+- **Small surface area, easy to extend**  
+  The codebase is structured to allow incremental addition of new endpoints without introducing breaking changes or unnecessary complexity.
 
 ## Requirements
 
@@ -24,7 +52,7 @@ For local development:
 ```bash
 python3.11 -m venv .venv
 source .venv/bin/activate
-pip install -e .[dev]
+pip install -e ".[dev]"
 ```
 
 ## Quick Start
@@ -131,3 +159,11 @@ Not implemented:
 - async support
 - CLI or MCP integrations
 - live DNS or CNAME discovery
+
+
+## Disclaimer
+
+This project is an unofficial SDK and is not affiliated with, endorsed by, or supported by Netskope.
+
+The SDK is provided on an "as-is" basis without warranties of any kind, express or implied.  
+Users are responsible for validating functionality and suitability for their own use cases.
