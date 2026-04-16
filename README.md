@@ -159,7 +159,6 @@ Not implemented:
 
 - POST, PUT, PATCH, DELETE
 - async support
-- CLI or MCP integrations
 - live DNS or CNAME discovery
 
 
