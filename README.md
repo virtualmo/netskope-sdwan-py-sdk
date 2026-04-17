@@ -225,6 +225,63 @@ Full API reference and usage guides:
 
 📚 https://virtualmo.github.io/netskope-sdwan-py-sdk/
 
+
+## Example token permissions
+
+Example SDWAN Tenant token permissions used for SDK validation:
+
+```json
+[
+  {
+    "rap_resource": "",
+    "rap_privs": [
+      "privGoskopeRead",
+      "privPolicyRead",
+      "privTaskRead",
+      "privSegmentObjectRead",
+      "privOverlayTagRead",
+      "privNotificationChannelRead",
+      "privSiteGroupRead",
+      "privManagedDeviceProfileRead",
+      "privTenantRead",
+      "privTenantView",
+      "privTenantSettingsRead",
+      "privAlertSettingsRead",
+      "privMonitorRead",
+      "privMonitorAlertRead",
+      "privInventoryDeviceRead",
+      "privSASERead",
+      "privManagedDevicePolicyRead",
+      "privUserGroupRead",
+      "privLoggedIn",
+      "privOpsProbe",
+      "privIpInfo",
+      "privSiteRead",
+      "privSiteWrite",
+      "privSiteToken",
+      "privSiteName",
+      "privManagedDeviceDestinationRead",
+      "privCaCertificateRead",
+      "privTokenRead",
+      "privCustomAppRead",
+      "privIdpRead",
+      "privIaasAccountRead",
+      "privAuditRecordRead",
+      "privAppAccessPolicyRead",
+      "privRoleRead",
+      "privUserRead",
+      "privAddressGroupRead",
+      "privAddressObjectRead",
+      "privManagedDeviceRead",
+      "privManagedDeviceServiceRead",
+      "privAppRead",
+      "privVPNPeerRead",
+      "privAppContainerRead",
+      "privRadiusRead"
+    ]
+  }
+]
+
 ## Disclaimer
 
 This project is unofficial and is not affiliated with, endorsed by, or supported by Netskope.
